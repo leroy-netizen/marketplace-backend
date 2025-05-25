@@ -1,0 +1,40 @@
+version: "3.8"
+
+services:
+  api:
+    build: .
+    container_name: marketplace-api
+    restart: always
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/marketplace
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:15
+    container_name: marketplace-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: marketplace
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7
+    container_name: marketplace-redis
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_data:

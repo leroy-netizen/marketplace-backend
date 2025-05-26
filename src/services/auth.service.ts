@@ -1,7 +1,10 @@
 import { AppDataSource } from "../config/db";
+import { redisClient } from "../config/redis";
 import { User } from "../entities/User";
 import { signAccessToken, signRefreshToken } from "../utils/jwt";
 import bcrypt from "bcrypt";
+import { sendOTPEmail } from "../utils/mailer";
+import { deleteOTP, getOTP, setOTP } from "../utils/otp";
 
 export const registerUser = async (
   name: string,
@@ -10,7 +13,6 @@ export const registerUser = async (
   role: "buyer" | "seller" | "admin" = "buyer"
 ) => {
   const userRepo = AppDataSource.getRepository(User);
-  console.log("user repsitoryo >", userRepo);
   const hashedPassword = await bcrypt.hash(password, 10);
   const normalizedEmail = email.trim().toLowerCase();
   const userExists = await userRepo.findOneBy({ email: normalizedEmail });
@@ -33,10 +35,6 @@ export const userLogin = async (email: string, password: string) => {
   const userFound = await userRepo.findOne({
     where: { email: normalizedEmail },
   });
-  console.log("user found >", userFound);
-  console.log("Email >", email, normalizedEmail);
-  const allUsers = await userRepo.find();
-  console.log("All users>", allUsers);
 
   if (!userFound) {
     throw new Error("User not found");
@@ -61,4 +59,33 @@ export const userLogin = async (email: string, password: string) => {
       role: userFound.role,
     },
   };
+};
+
+export const forgotPasswordService = async (email: string) => {
+  const userRepo = AppDataSource.getRepository(User);
+  const user = await userRepo.findOneBy({ email });
+  if (!user) throw new Error("User not found");
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  await setOTP(email, otp);
+  await sendOTPEmail(email, otp);
+};
+
+export const resetPasswordService = async (
+  email: string,
+  otp: string,
+  newPassword: string
+) => {
+  const storedOtp = await getOTP(email);
+  if (!storedOtp || storedOtp !== otp) {
+    throw new Error("Invalid or expired OTP");
+  }
+
+  const userRepo = AppDataSource.getRepository(User);
+  const user = await userRepo.findOneBy({ email });
+  if (!user) throw new Error("User not found");
+
+  user.password = await bcrypt.hash(newPassword, 10);
+  await userRepo.save(user);
+  await deleteOTP(email);
 };

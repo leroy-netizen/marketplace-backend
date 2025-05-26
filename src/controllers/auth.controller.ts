@@ -1,5 +1,10 @@
 import { Request, Response, RequestHandler } from "express";
-import { registerUser, userLogin } from "../services/auth.service";
+import {
+  forgotPasswordService,
+  registerUser,
+  resetPasswordService,
+  userLogin,
+} from "../services/auth.service";
 
 export const signup = async (req: Request, res: Response) => {
   const { name, email, password, role } = req.body;
@@ -27,5 +32,24 @@ export const signin = async (req: Request, res: Response) => {
     return res.status(200).json(data);
   } catch (error: any) {
     return res.status(400).json({ message: error.message });
+  }
+};
+export const forgotPasswordController = async (req: Request, res: Response) => {
+  const { email } = req.body;
+  try {
+    await forgotPasswordService(email);
+    res.status(200).json({ message: `OTP sent to ${email}` });
+  } catch (err: any) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+export const resetPasswordController = async (req: Request, res: Response) => {
+  const { email, otp, newPassword } = req.body;
+  try {
+    await resetPasswordService(email, otp, newPassword);
+    res.status(200).json({ message: "Password has been successfully reset" });
+  } catch (err: any) {
+    res.status(400).json({ message: err.message });
   }
 };

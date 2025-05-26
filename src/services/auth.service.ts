@@ -4,7 +4,7 @@ import { User } from "../entities/User";
 import { signAccessToken, signRefreshToken } from "../utils/jwt";
 import bcrypt from "bcrypt";
 import { sendOTPEmail } from "../utils/mailer";
-import { deleteOTP, getOTP, setOTP } from "../utils/otp";
+import { canRequestOTP, deleteOTP, getOTP, setOTP } from "../utils/otp";
 
 export const registerUser = async (
   name: string,
@@ -65,6 +65,8 @@ export const forgotPasswordService = async (email: string) => {
   const userRepo = AppDataSource.getRepository(User);
   const user = await userRepo.findOneBy({ email });
   if (!user) throw new Error("User not found");
+  const canRequest = await canRequestOTP(email);
+  if (!canRequest) throw new Error("Too many OTP requests. Try again later.");
 
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
   await setOTP(email, otp);

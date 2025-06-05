@@ -47,13 +47,23 @@ export const getSellerProducts = async (sellerId: string) => {
 
 // list all products by all sellers (@publicly browsable)
 
-export const getAllProducts = async () => {
+export const getAllProducts = async (page = 1, limit = 10) => {
   const productRepo = AppDataSource.getRepository(Product);
-  const products = productRepo.find({
-    relations: ["seller"],
-    order: { createdAt: "DESC" },
-  });
-  return products;
+
+  const [products, total] = await productRepo
+    .createQueryBuilder("product")
+    .leftJoinAndSelect("product.seller", "seller")
+    .orderBy("product.createdAt", "DESC")
+    .skip((page - 1) * limit)
+    .take(limit)
+    .getManyAndCount();
+
+  return {
+    products,
+    total,
+    currentPage: page,
+    totalPages: Math.ceil(total / limit),
+  };
 };
 
 //list products by seller id (public/ browsable)

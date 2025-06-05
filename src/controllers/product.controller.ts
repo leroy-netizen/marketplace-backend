@@ -60,13 +60,14 @@ export const getSellerProductsController = async (
   }
 };
 
-export const getAllProductsController = async (
-  _req: Request,
-  res: Response
-) => {
+export const getAllProductsController = async (req: Request, res: Response) => {
   try {
-    const products = await getAllProducts();
-    res.status(200).json({ message: "All products", data: products });
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    console.log({ page: page, limit: limit });
+
+    const products = await getAllProducts(page, limit);
+    res.status(200).json({ message: "All products", ...products });
   } catch (err: any) {
     res.status(500).json({ message: err.message });
   }
@@ -78,7 +79,7 @@ export const getProductsBySellerController = async (
   try {
     const { sellerId } = req.params;
     const products = await getProductsBySeller(sellerId);
-    res.status(200).json({ message: "Seller products", data: products });
+    res.status(200).json({ message: "Seller products", ...products });
   } catch (err: any) {
     res.status(500).json({ message: err.message });
   }
@@ -107,19 +108,19 @@ export const updateProductController = async (
   try {
     const sellerId = req.user!.id;
     const productId = req.params.id;
-    console.log({Request: req})
-    
+    console.log({ Request: req });
+
     const { title, description, price, category, imagesToKeep } = req.body;
-    
+
     const keep = Array.isArray(imagesToKeep)
-    ? imagesToKeep
-    : imagesToKeep
-    ? [imagesToKeep]
-    : [];
-    
+      ? imagesToKeep
+      : imagesToKeep
+        ? [imagesToKeep]
+        : [];
+
     const files = req.files as Express.Multer.File[] | undefined;
     const newImages = files ? files.map((f) => `/uploads/${f.filename}`) : [];
-    
+
     const updatedProduct = await updateProduct({
       title,
       description,
@@ -131,10 +132,10 @@ export const updateProductController = async (
       productId,
     });
     console.log("seller id from controller >", sellerId);
-    
+
     return res
-    .status(200)
-    .json({ message: "Product updated", data: updatedProduct });
+      .status(200)
+      .json({ message: "Product updated", data: updatedProduct });
   } catch (err: any) {
     // console.log({ Request: req });
     const code = err.message === "Unauthorized" ? 403 : 404;

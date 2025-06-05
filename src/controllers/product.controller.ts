@@ -64,9 +64,11 @@ export const getAllProductsController = async (req: Request, res: Response) => {
   try {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
-    console.log({ page: page, limit: limit });
+    const search = (req.query.search as string) || "";
 
-    const products = await getAllProducts(page, limit);
+    console.log("search >>", search);
+    // const products = await getAllProducts({ page, limit, search });
+    const products = await getAllProducts(req.query);
     res.status(200).json({ message: "All products", ...products });
   } catch (err: any) {
     res.status(500).json({ message: err.message });

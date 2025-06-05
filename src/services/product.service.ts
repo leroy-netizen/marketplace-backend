@@ -47,21 +47,71 @@ export const getSellerProducts = async (sellerId: string) => {
 
 // list all products by all sellers (@publicly browsable)
 
-export const getAllProducts = async (page = 1, limit = 10) => {
-  const productRepo = AppDataSource.getRepository(Product);
+export const getAllProducts = async (query: any) => {
+  const {
+    page = 1,
+    limit = 10,
+    search,
+    category,
+    minPrice,
+    maxPrice,
+    startDate,
+    endDate,
+    title,
+  } = query;
 
-  const [products, total] = await productRepo
+  const skip = (Number(page) - 1) * Number(limit);
+  const take = Number(limit);
+
+  const productRepo = AppDataSource.getRepository(Product);
+  const qb = productRepo
     .createQueryBuilder("product")
-    .leftJoinAndSelect("product.seller", "seller")
+    .leftJoinAndSelect("product.seller", "seller");
+
+  // Search across title and description
+  if (search) {
+    qb.andWhere(
+      "(LOWER(product.title) LIKE :search OR LOWER(product.description) LIKE :search)",
+      { search: `%${search.toLowerCase()}%` }
+    );
+  }
+
+  if (category) {
+    qb.andWhere("product.category = :category", { category });
+  }
+
+  if (minPrice) {
+    qb.andWhere("product.price >= :minPrice", { minPrice: Number(minPrice) });
+  }
+
+  if (maxPrice) {
+    qb.andWhere("product.price <= :maxPrice", { maxPrice: Number(maxPrice) });
+  }
+
+  if (startDate) {
+    qb.andWhere("product.createdAt >= :startDate", { startDate });
+  }
+
+  if (endDate) {
+    qb.andWhere("product.createdAt <= :endDate", { endDate });
+  }
+
+  if (title) {
+    qb.andWhere("LOWER(product.title) LIKE :title", {
+      title: `%${title.toLowerCase()}%`,
+    });
+  }
+
+  const [products, total] = await qb
     .orderBy("product.createdAt", "DESC")
-    .skip((page - 1) * limit)
-    .take(limit)
+    .skip(skip)
+    .take(take)
     .getManyAndCount();
 
   return {
-    products,
-    total,
-    currentPage: page,
+    data: products,
+    currentPage: Number(page),
+    totalItems: total,
     totalPages: Math.ceil(total / limit),
   };
 };

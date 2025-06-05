@@ -46,6 +46,8 @@ export const userLogin = async (email: string, password: string) => {
     throw new Error("Invalid credentials");
   }
 
+  console.log("userFound >>:", userFound);
+
   const accessToken = signAccessToken(userFound.id, userFound.role);
   const refreshToken = signRefreshToken(userFound.id);
 

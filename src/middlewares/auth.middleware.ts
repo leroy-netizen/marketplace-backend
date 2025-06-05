@@ -1,17 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+import { AuthenticatedRequest } from "../types";
 import dotenv from "dotenv";
 
 dotenv.config();
-
-interface JwtPayload {
-  id: string;
-  role: "buyer" | "seller" | "admin";
-}
-
-export interface AuthenticatedRequest extends Request {
-  user?: JwtPayload;
-}
 
 export const authenticate = (
   req: AuthenticatedRequest,
@@ -21,18 +13,26 @@ export const authenticate = (
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res
-      .status(401)
-      .json({ message: "Access token missing or malformed" });
+    return res.status(401).json({ message: "No token provided" });
   }
 
   const token = authHeader.split(" ")[1];
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-    req.user = payload;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+      id: string;
+      role: string;
+    };
+
+    console.log("Decoded token >>:", decoded);
+    req.user = {
+      id: decoded.id,
+      role: decoded.role,
+    };
+
     next();
   } catch (err) {
-    return res.status(401).json({ message: "Invalid or expired token" });
+    console.log("Decoded token Error >>:", err);
+    return res.status(401).json({ message: "Invalid token" });
   }
 };

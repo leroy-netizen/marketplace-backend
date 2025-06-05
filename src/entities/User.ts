@@ -3,8 +3,10 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  OneToMany,
 } from "typeorm";
 import { IsEmail, Length } from "class-validator";
+import { Product } from "./Product";
 
 export type UserRole = "buyer" | "seller" | "admin";
 
@@ -32,4 +34,7 @@ export class User {
 
   @CreateDateColumn()
   createdAt!: Date;
+
+  @OneToMany(() => Product, (product) => product.seller, { eager: false })
+  products!: Product[];
 }

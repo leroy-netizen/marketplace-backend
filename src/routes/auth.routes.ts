@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { signin, signup } from "../controllers/auth.controller";
+import { authenticate } from "../middlewares/auth.middleware";
 import {
   forgotPasswordController,
   resetPasswordController,

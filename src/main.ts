@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { AppDataSource } from "./config/db";
 import authRoutes from "./routes/auth.routes";
+import productRoutes from "./routes/products.routes";
+import path from "path";
 
 dotenv.config();
 
@@ -15,6 +17,8 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 
 //product routes
+app.use("/api/products", productRoutes);
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 const PORT = process.env.PORT || 5000;
 

@@ -3,6 +3,7 @@ import {
   createProduct,
   deleteProduct,
   getAllProducts,
+  getPredictiveSuggestions,
   getProductsBySeller,
   getSellerProducts,
   updateProduct,
@@ -67,13 +68,25 @@ export const getAllProductsController = async (req: Request, res: Response) => {
     const search = (req.query.search as string) || "";
 
     console.log("search >>", search);
-    // const products = await getAllProducts({ page, limit, search });
+
     const products = await getAllProducts(req.query);
     res.status(200).json({ message: "All products", ...products });
   } catch (err: any) {
     res.status(500).json({ message: err.message });
   }
 };
+export const suggestProductsController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const suggestions = await getPredictiveSuggestions(req.query);
+    return res.status(200).json({ suggestions });
+  } catch (err: any) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
 export const getProductsBySellerController = async (
   req: Request<{ sellerId: string }>,
   res: Response

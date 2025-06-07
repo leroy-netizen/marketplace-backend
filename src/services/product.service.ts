@@ -3,6 +3,7 @@ import { AppDataSource } from "../config/db";
 import { Product } from "../entities/Product";
 import { User } from "../entities/User";
 import { unlinkSync } from "fs";
+import Fuse from "fuse.js";
 
 interface CreateProductPayload {
   title: string;
@@ -47,23 +48,104 @@ export const getSellerProducts = async (sellerId: string) => {
 
 // list all products by all sellers (@publicly browsable)
 
-export const getAllProducts = async (page = 1, limit = 10) => {
-  const productRepo = AppDataSource.getRepository(Product);
+export const getAllProducts = async (query: any) => {
+  const { page = 1, limit = 10, search, fuzzy, ...filters } = query;
 
-  const [products, total] = await productRepo
+  const take = Number(limit);
+
+  const productRepo = AppDataSource.getRepository(Product);
+  const qb = productRepo
     .createQueryBuilder("product")
-    .leftJoinAndSelect("product.seller", "seller")
-    .orderBy("product.createdAt", "DESC")
-    .skip((page - 1) * limit)
-    .take(limit)
-    .getManyAndCount();
+    .leftJoinAndSelect("product.seller", "seller");
+
+  // Search across title and description
+  const { category, minPrice, maxPrice, startDate, endDate, title } = filters;
+  if (search && !fuzzy) {
+    qb.andWhere(
+      "(LOWER(product.title) LIKE :search OR LOWER(product.description) LIKE :search)",
+      { search: `%${search.toLowerCase()}%` }
+    );
+  }
+
+  if (category) {
+    qb.andWhere("product.category = :category", { category });
+  }
+
+  if (minPrice) {
+    qb.andWhere("product.price >= :minPrice", { minPrice: Number(minPrice) });
+  }
+
+  if (maxPrice) {
+    qb.andWhere("product.price <= :maxPrice", { maxPrice: Number(maxPrice) });
+  }
+
+  if (startDate) {
+    qb.andWhere("product.createdAt >= :startDate", { startDate });
+  }
+
+  if (endDate) {
+    qb.andWhere("product.createdAt <= :endDate", { endDate });
+  }
+
+  if (title) {
+    qb.andWhere("LOWER(product.title) LIKE :title", {
+      title: `%${title.toLowerCase()}%`,
+    });
+  }
+
+  const allResults = await qb.getMany();
+  let filteredResults = allResults;
+
+  if (fuzzy && search) {
+    const fuse = new Fuse(allResults, {
+      keys: ["title", "description", "category"],
+      threshold: 0.3, // lower threshold for fuzzier matching
+      distance: 200, // how far in the text to allow a match
+      minMatchCharLength: 2, // avoids ignoring short strings
+      includeScore: true,
+    });
+    const results = fuse.search(search);
+    filteredResults = results.map((result) => result.item);
+  } else if (search) {
+    // Standard search fallback (optional)
+    filteredResults = allResults.filter(
+      (product) =>
+        product.title.toLowerCase().includes(search.toLowerCase()) ||
+        product.description.toLowerCase().includes(search.toLowerCase())
+    );
+  }
+
+  const total = filteredResults.length;
+  const skip = (Number(page) - 1) * Number(limit);
+  const paginated = filteredResults.slice(skip, skip + Number(limit));
 
   return {
-    products,
-    total,
-    currentPage: page,
+    data: paginated,
+    currentPage: Number(page),
+    totalItems: total,
     totalPages: Math.ceil(total / limit),
   };
+};
+
+//predictive search for products
+export const getPredictiveSuggestions = async (query: any) => {
+  const { query: searchTerm } = query;
+  if (!searchTerm || typeof searchTerm !== "string") {
+    throw new Error("Query is required");
+  }
+
+  const productRepo = AppDataSource.getRepository(Product);
+
+  const suggestions = await productRepo
+    .createQueryBuilder("product")
+    .select("product.title")
+    .where("LOWER(product.title) LIKE :search", {
+      search: `${searchTerm.toLowerCase()}%`,
+    })
+    .limit(5)
+    .getMany();
+
+  return suggestions.map((p) => p.title);
 };
 
 //list products by seller id (public/ browsable)

@@ -1,5 +1,5 @@
-import { AppDataSource } from "../config/db";
-import { redisClient } from "../config/redis";
+import { AppDataSource } from "../config/db.config";
+import { redisClient } from "../config/redis.config";
 import { User } from "../entities/User";
 import { signAccessToken, signRefreshToken } from "../utils/jwt";
 import bcrypt from "bcrypt";

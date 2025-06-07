@@ -1,5 +1,5 @@
 import { resolve } from "path";
-import { AppDataSource } from "../config/db";
+import { AppDataSource } from "../config/db.config";
 import { Product } from "../entities/Product";
 import { User } from "../entities/User";
 import { unlinkSync } from "fs";

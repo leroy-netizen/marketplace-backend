@@ -146,7 +146,6 @@ export const updateProductController = async (
       sellerId,
       productId,
     });
-    console.log("seller id from controller >", sellerId);
 
     return res
       .status(200)

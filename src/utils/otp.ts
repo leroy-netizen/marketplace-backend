@@ -1,4 +1,4 @@
-import { redisClient } from "../config/redis";
+import { redisClient } from "../config/redis.config";
 
 const OTP_EXPIRY_SECONDS = 300;
 const OTP_RATE_LIMIT = 5;

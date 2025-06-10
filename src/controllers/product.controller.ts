@@ -148,7 +148,6 @@ export const updateProductController = async (
       .status(200)
       .json({ message: "Product updated", data: updatedProduct });
   } catch (err: any) {
-    // console.log({ Request: req });
     const code = err.message === "Unauthorized" ? 403 : 404;
     return res.status(code).json({ message: err.message });
   }

@@ -1,11 +1,11 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { AppDataSource } from "./config/db";
+import { AppDataSource } from "./config/db.config";
 import authRoutes from "./routes/auth.routes";
 import productRoutes from "./routes/products.routes";
 import path from "path";
-import { swaggerUi, swaggerSpec } from "./config/swagger";
+import { swaggerUi, swaggerSpec } from "./config/swagger.config";
 
 dotenv.config();
 

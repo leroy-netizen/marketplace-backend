@@ -9,7 +9,6 @@ import {
   updateProduct,
 } from "../services/product.service";
 
-// import { AuthenticatedRequest } from "../middlewares/auth.middleware";
 import { AuthenticatedRequest } from "../types";
 
 export const createProductController = async (
@@ -66,8 +65,6 @@ export const getAllProductsController = async (req: Request, res: Response) => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = (req.query.search as string) || "";
-
- 
 
     const products = await getAllProducts(req.query);
     res.status(200).json({ message: "All products", ...products });

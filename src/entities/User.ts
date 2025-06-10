@@ -7,6 +7,8 @@ import {
 } from "typeorm";
 import { IsEmail, Length } from "class-validator";
 import { Product } from "./Product";
+import { RefreshToken } from "./RefreshToken";
+import { CartItem } from "./CartItem";
 
 export type UserRole = "buyer" | "seller" | "admin";
 
@@ -34,7 +36,13 @@ export class User {
 
   @CreateDateColumn()
   createdAt!: Date;
+  @OneToMany(() => CartItem, (cartItem) => cartItem.user, { eager: false })
+  cartItems!: CartItem[];
 
   @OneToMany(() => Product, (product) => product.seller, { eager: false })
   products!: Product[];
+  @OneToMany(() => RefreshToken, (token) => token.user, {
+    cascade: true,
+  })
+  refreshTokens!: RefreshToken[];
 }

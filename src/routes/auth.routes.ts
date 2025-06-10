@@ -1,6 +1,9 @@
 import { Router } from "express";
-import { signin, signup } from "../controllers/auth.controller";
-import { authenticate } from "../middlewares/auth.middleware";
+import {
+  refreshAccessToken,
+  signin,
+  signup,
+} from "../controllers/auth.controller";
 import {
   forgotPasswordController,
   resetPasswordController,
@@ -13,5 +16,7 @@ router.post("/signup", signup);
 router.post("/signin", signin);
 router.post("/forgot-password", forgotPasswordController);
 router.post("/reset-password", resetPasswordController);
+//@ts-ignore
+router.post("/refresh", refreshAccessToken);
 
 export default router;

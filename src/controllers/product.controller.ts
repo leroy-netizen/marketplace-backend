@@ -67,7 +67,7 @@ export const getAllProductsController = async (req: Request, res: Response) => {
     const limit = parseInt(req.query.limit as string) || 10;
     const search = (req.query.search as string) || "";
 
-    console.log("search >>", search);
+ 
 
     const products = await getAllProducts(req.query);
     res.status(200).json({ message: "All products", ...products });

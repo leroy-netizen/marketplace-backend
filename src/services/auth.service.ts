@@ -31,6 +31,7 @@ export const registerUser = async (
 
 export const userLogin = async (email: string, password: string) => {
   const userRepo = AppDataSource.getRepository(User);
+  const refreshTokenRepo = AppDataSource.getRepository("RefreshToken");
   const normalizedEmail = email.trim().toLowerCase();
   const userFound = await userRepo.findOne({
     where: { email: normalizedEmail },
@@ -46,10 +47,15 @@ export const userLogin = async (email: string, password: string) => {
     throw new Error("Invalid credentials");
   }
 
-  console.log("userFound >>:", userFound);
-
   const accessToken = signAccessToken(userFound.id, userFound.role);
   const refreshToken = signRefreshToken(userFound.id);
+
+  // Save refresh token
+  const newToken = refreshTokenRepo.create({
+    user: userFound,
+    token: refreshToken,
+  });
+  await refreshTokenRepo.save(newToken);
 
   return {
     accessToken,

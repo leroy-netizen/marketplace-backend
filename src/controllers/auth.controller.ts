@@ -1,10 +1,14 @@
 import { Request, Response, RequestHandler } from "express";
+import jwt from "jsonwebtoken";
+import { RefreshToken } from "../entities/RefreshToken";
 import {
   forgotPasswordService,
   registerUser,
   resetPasswordService,
   userLogin,
 } from "../services/auth.service";
+import { AppDataSource } from "../config/db.config";
+import { signAccessToken } from "../utils/jwt";
 
 export const signup = async (req: Request, res: Response) => {
   const { name, email, password, role } = req.body;
@@ -32,6 +36,45 @@ export const signin = async (req: Request, res: Response) => {
     return res.status(200).json(data);
   } catch (error: any) {
     return res.status(400).json({ message: error.message });
+  }
+};
+
+export const refreshAccessToken = async (
+  req: Request,
+  res: Response
+): Promise<Response<any, Record<string, any>>> => {
+  const refreshToken = req.body.refreshToken;
+
+  if (!refreshToken) {
+    return res.status(400).json({ message: "Refresh token required" });
+  }
+
+  try {
+    const payload = jwt.verify(
+      refreshToken,
+      process.env.JWT_REFRESH_SECRET!
+    ) as {
+      userId: string;
+    };
+
+    const repo = AppDataSource.getRepository(RefreshToken);
+    const tokenInDb = await repo.findOne({
+      where: { token: refreshToken },
+      relations: ["user"],
+    });
+
+    if (!tokenInDb) {
+      return res.status(401).json({ message: "Invalid refresh token" });
+    }
+
+    const newAccessToken = signAccessToken(
+      tokenInDb.user.id,
+      tokenInDb.user.role
+    );
+
+    return res.status(200).json({ accessToken: newAccessToken });
+  } catch (err) {
+    return res.status(403).json({ message: "Invalid or expired token" });
   }
 };
 export const forgotPasswordController = async (req: Request, res: Response) => {

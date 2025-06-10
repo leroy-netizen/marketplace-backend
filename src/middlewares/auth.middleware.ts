@@ -13,7 +13,8 @@ export const authenticate = (
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided" });
+    res.status(401).json({ message: "No token provided" });
+    return;
   }
 
   const token = authHeader.split(" ")[1];
@@ -32,7 +33,6 @@ export const authenticate = (
 
     next();
   } catch (err) {
-    console.log("Decoded token Error >>:", err);
-    return res.status(401).json({ message: "Invalid token" });
+    res.status(401).json({ message: "Invalid token" });
   }
 };

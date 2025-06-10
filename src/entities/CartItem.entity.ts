@@ -5,8 +5,8 @@ import {
   Column,
   CreateDateColumn,
 } from "typeorm";
-import { User } from "./User";
-import { Product } from "./Product";
+import { User } from "./User.entity";
+import { Product } from "./Product.entity";
 
 @Entity()
 export class CartItem {

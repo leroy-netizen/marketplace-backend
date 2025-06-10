@@ -14,7 +14,7 @@ import { AuthenticatedRequest } from "../types";
 export const createProductController = async (
   req: AuthenticatedRequest,
   res: Response
-) => {
+): Promise<void> => {
   const files = req.files as Express.Multer.File[];
   const imagePaths = files.map((file) => file.path);
   try {
@@ -22,7 +22,8 @@ export const createProductController = async (
     const user = req.user; // from auth middleware
 
     if (!user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      res.status(401).json({ message: "Unauthorized" });
+      return;
     }
 
     const product = await createProduct({
@@ -34,12 +35,13 @@ export const createProductController = async (
       sellerId: user.id,
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       message: "Product created successfully",
       data: product,
     });
+    return;
   } catch (error: any) {
-    return res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 

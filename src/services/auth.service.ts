@@ -1,6 +1,6 @@
 import { AppDataSource } from "../config/db.config";
 import { redisClient } from "../config/redis.config";
-import { User } from "../entities/User";
+import { User } from "../entities/User.entity";
 import { signAccessToken, signRefreshToken } from "../utils/jwt";
 import bcrypt from "bcrypt";
 import { sendOTPEmail } from "../utils/mailer";

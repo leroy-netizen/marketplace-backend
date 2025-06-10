@@ -1,7 +1,7 @@
 import { resolve } from "path";
 import { AppDataSource } from "../config/db.config";
-import { Product } from "../entities/Product";
-import { User } from "../entities/User";
+import { Product } from "../entities/Product.entity";
+import { User } from "../entities/User.entity";
 import { unlinkSync } from "fs";
 import Fuse from "fuse.js";
 

@@ -1,6 +1,6 @@
 import { Request, Response, RequestHandler } from "express";
 import jwt from "jsonwebtoken";
-import { RefreshToken } from "../entities/RefreshToken";
+import { RefreshToken } from "../entities/RefreshToken.entity";
 import {
   forgotPasswordService,
   registerUser,

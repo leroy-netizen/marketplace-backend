@@ -7,6 +7,7 @@ import {
   updateProductController,
   getAllProductsController,
   suggestProductsController,
+  getProductByIdController,
 } from "../controllers/product.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { upload } from "../middlewares/upload.middleware";
@@ -33,6 +34,7 @@ productRoutes.get("/seller", authenticate, getSellerProductsController);
 // get seller products by id (public)
 
 productRoutes.get("/seller/:sellerId", getProductsBySellerController);
+productRoutes.get("/products/:id", getProductByIdController);
 //@ts-ignore
 productRoutes.delete("/products/:id", authenticate, deleteProductController);
 productRoutes.put(

@@ -4,6 +4,7 @@ import {
   deleteProduct,
   getAllProducts,
   getPredictiveSuggestions,
+  getProductById,
   getProductsBySeller,
   getSellerProducts,
   updateProduct,
@@ -59,6 +60,22 @@ export const getSellerProductsController = async (
     });
   } catch (error: any) {
     return res.status(500).json({ message: error.message });
+  }
+};
+export const getProductByIdController = async (req: Request, res: Response) => {
+  try {
+    const productId = req.params.id;
+    const product = await getProductById(productId);
+    if (!product) {
+      res.status(400).json({ message: "Product not found" });
+      return;
+    }
+    res
+      .status(200)
+      .json({ message: "Product fetched successfully", data: product });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+    return;
   }
 };
 

@@ -3,7 +3,7 @@ import {
   getCartItems,
   addToCart,
   updateCartItem,
-  deleteCartItem,
+  removeCartItem,
   clearCart,
 } from "../controllers/cart.controller";
 import { authenticate } from "../middlewares/auth.middleware";
@@ -13,10 +13,8 @@ export const cartRoutes = express.Router();
 
 cartRoutes.use(authenticate);
 
-cartRoutes.get("/get-all-items", getCartItems);
+cartRoutes.get("/get-all-items", authenticate, getCartItems);
 cartRoutes.post("/add-to", authenticate, addToCart);
 cartRoutes.patch("/update/:itemId", updateCartItem);
-cartRoutes.delete("/remove/:itemId", deleteCartItem);
-cartRoutes.delete("/clear", clearCart);
-
-
+cartRoutes.delete("/remove/:itemId", authenticate, removeCartItem);
+cartRoutes.delete("/clear", authenticate, clearCart);

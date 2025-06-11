@@ -43,7 +43,7 @@
 
 /**
  * @swagger
- * /get-all-items:
+ * /cart/get-all-items:
  *   get:
  *     summary: Get all items in the user's cart
  *     tags: [Cart]

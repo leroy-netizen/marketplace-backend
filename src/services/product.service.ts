@@ -3,6 +3,7 @@ import { AppDataSource } from "../config/db.config";
 import { Product } from "../entities/Product.entity";
 import { User } from "../entities/User.entity";
 import { unlinkSync } from "fs";
+import { redisClient } from "../config/redis.config";
 import Fuse from "fuse.js";
 
 interface CreateProductPayload {
@@ -31,18 +32,32 @@ export const createProduct = async (payload: CreateProductPayload) => {
     images: payload.images,
     seller,
   });
+  const savedProduct = await productRepo.save(newProduct);
+  await invalidateSellerProductsCache(payload.sellerId);
 
-  return await productRepo.save(newProduct);
+  return savedProduct;
 };
 
 //for when a seller needs to view the products they have / also when a user just want to go to the specific seller listing
 export const getSellerProducts = async (sellerId: string) => {
+  const cachedProducts = await redisClient.get(`seller:products:${sellerId}`);
+
+  if (cachedProducts) {
+    return JSON.parse(cachedProducts);
+  }
+
   const productRepo = AppDataSource.getRepository(Product);
   const products = productRepo.find({
     where: { seller: { id: sellerId } },
     relations: ["seller"],
     order: { createdAt: "DESC" },
   });
+
+  await redisClient.setEx(
+    `seller:products:${sellerId}`,
+    PRODUCT_CACHE_TTL,
+    JSON.stringify(products)
+  );
   return products;
 };
 
@@ -60,7 +75,12 @@ export const getAllProducts = async (query: any) => {
 
   // Search across title and description
   const { category, minPrice, maxPrice, startDate, endDate, title } = filters;
-  if (search && !fuzzy) {
+
+  // Convert fuzzy to boolean properly
+  const useFuzzySearch = fuzzy === "true" || fuzzy === true;
+
+  // Apply non-fuzzy search directly in the query builder if needed
+  if (search && !useFuzzySearch) {
     qb.andWhere(
       "(LOWER(product.title) LIKE :search OR LOWER(product.description) LIKE :search)",
       { search: `%${search.toLowerCase()}%` }
@@ -93,28 +113,37 @@ export const getAllProducts = async (query: any) => {
     });
   }
 
-  const allResults = await qb.getMany();
-  let filteredResults = allResults;
+  // For non-fuzzy search, we can directly return the query results
+  if (!useFuzzySearch || !search) {
+    const [results, total] = await qb
+      .skip((Number(page) - 1) * take)
+      .take(take)
+      .getManyAndCount();
 
-  if (fuzzy && search) {
-    const fuse = new Fuse(allResults, {
-      keys: ["title", "description", "category"],
-      threshold: 0.3, // lower threshold for fuzzier matching
-      distance: 200, // how far in the text to allow a match
-      minMatchCharLength: 2, // avoids ignoring short strings
-      includeScore: true,
-    });
-    const results = fuse.search(search);
-    filteredResults = results.map((result) => result.item);
-  } else if (search) {
-    // Standard search fallback (optional)
-    filteredResults = allResults.filter(
-      (product) =>
-        product.title.toLowerCase().includes(search.toLowerCase()) ||
-        product.description.toLowerCase().includes(search.toLowerCase())
-    );
+    return {
+      data: results,
+      currentPage: Number(page),
+      totalItems: total,
+      totalPages: Math.ceil(total / take),
+    };
   }
 
+  // For fuzzy search, we need to get all results and filter them
+  const allResults = await qb.getMany();
+
+  // Apply fuzzy search
+  const fuse = new Fuse(allResults, {
+    keys: ["title", "description", "category"],
+    threshold: 0.3,
+    distance: 200,
+    minMatchCharLength: 2,
+    includeScore: true,
+  });
+
+  const searchResults = fuse.search(search);
+  const filteredResults = searchResults.map((result) => result.item);
+
+  // Apply pagination to filtered results
   const total = filteredResults.length;
   const skip = (Number(page) - 1) * Number(limit);
   const paginated = filteredResults.slice(skip, skip + Number(limit));
@@ -123,8 +152,39 @@ export const getAllProducts = async (query: any) => {
     data: paginated,
     currentPage: Number(page),
     totalItems: total,
-    totalPages: Math.ceil(total / limit),
+    totalPages: Math.ceil(total / Number(limit)),
   };
+};
+const PRODUCT_CACHE_TTL = 3600; // 1 hour
+
+const invalidateProductCache = async (productId: string) => {
+  await redisClient.del(`product${productId}`);
+};
+const invalidateSellerProductsCache = async (sellerId: string) => {
+  await redisClient.del(`seller:products:${sellerId}`);
+};
+
+//get product by id (publicly browsable)
+export const getProductById = async (productId: string) => {
+  const cachedProduct = await redisClient.get(`product:${productId}`);
+  if (cachedProduct) {
+    return JSON.parse(cachedProduct);
+  }
+  const productRepo = AppDataSource.getRepository(Product);
+  const product = await productRepo.findOne({
+    where: { id: productId },
+    relations: ["seller"],
+  });
+  if (!product) {
+    throw new Error("Product not found");
+  }
+  // Cache the product
+  await redisClient.setEx(
+    `product:${productId}`,
+    PRODUCT_CACHE_TTL,
+    JSON.stringify(product)
+  );
+  return product;
 };
 
 //predictive search for products
@@ -170,6 +230,8 @@ export const deleteProduct = async (productId: string, sellerId: string) => {
   if (product.seller.id !== sellerId) throw new Error("Unauthorized");
 
   await productRepo.remove(product);
+  await invalidateProductCache(productId);
+  await invalidateSellerProductsCache(sellerId);
   return true;
 };
 
@@ -235,6 +297,8 @@ export const updateProduct = async ({
     category,
     images: finalImages,
   });
+  const updatedProduct = await productRepo.save(product);
+  await invalidateProductCache(productId);
 
-  return await productRepo.save(product);
+  return updatedProduct;
 };

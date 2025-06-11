@@ -56,8 +56,10 @@
  *               email:
  *                 type: string
  *                 format: email
+ *                 example: teveca6671@jio1.com
  *               password:
  *                 type: string
+ *                 example: testPass
  *     responses:
  *       200:
  *         description: Authentication successful

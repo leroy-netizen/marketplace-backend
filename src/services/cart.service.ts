@@ -1,7 +1,28 @@
 import { AppDataSource } from "../config/db.config";
 import { CartItem, Product, User } from "../entities";
+import { redisClient } from "../config/redis.config";
 
-export const getCartItemsService = async (userId: string) => {};
+const CART_CACHE_TTL = 1800; //30 minutes
+
+export const getUserCartItems = async (userId: string) => {
+  const cachedCart = await redisClient.get(`cart:${userId}`);
+  if (cachedCart) {
+    return JSON.parse(cachedCart);
+  }
+  const cartRepo = AppDataSource.getRepository(CartItem);
+
+  const cartItems = cartRepo.find({
+    where: { user: { id: userId } },
+    relations: ["product", "user"],
+  });
+
+  await redisClient.setEx(
+    `cart:${userId}`,
+    CART_CACHE_TTL,
+    JSON.stringify(cartItems)
+  );
+  return cartItems;
+};
 export const addOrUpdateCartItem = async (
   userId: string,
   productId: string,
@@ -42,13 +63,44 @@ export const addOrUpdateCartItem = async (
   return await cartRepo.save(newCartItem);
 };
 
-export const updateCartItemService = async (
+export const updateCartItemQuantity = async (
   userId: string,
-  itemId: string,
+  cartItemId: string,
   quantity: number
-) => {};
-export const deleteCartItemService = async (
-  userId: string,
-  itemId: string
-) => {};
-export const clearCartService = async (userId: string) => {};
+) => {
+  const repo = AppDataSource.getRepository(CartItem);
+  const item = await repo.findOne({
+    where: { id: cartItemId },
+    relations: ["user"],
+  });
+
+  if (!item || item.user.id !== userId) {
+    throw new Error("Cart item not found or unauthorized");
+  }
+
+  item.quantity = quantity;
+  return await repo.save(item);
+};
+export const deleteCartItem = async (userId: string, cartItemId: string) => {
+  const repo = AppDataSource.getRepository(CartItem);
+  const item = await repo.findOne({
+    where: { id: cartItemId },
+    relations: ["user"],
+  });
+
+  if (!item || item.user.id !== userId) {
+    throw new Error("Cart item not found or unauthorized");
+  }
+
+  await repo.remove(item);
+};
+export const clearUserCart = async (userId: string) => {
+  const repo = AppDataSource.getRepository(CartItem);
+  const items = await repo.find({
+    where: { user: { id: userId } },
+  });
+
+  await repo.remove(items);
+
+  await redisClient.del(`cartL${userId}`);
+};

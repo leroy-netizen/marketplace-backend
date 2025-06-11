@@ -25,7 +25,6 @@ export const authenticate = (
       role: string;
     };
 
-    console.log("Decoded token >>:", decoded);
     req.user = {
       id: decoded.id,
       role: decoded.role,

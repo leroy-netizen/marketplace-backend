@@ -96,6 +96,25 @@
  *       500:
  *         description: Server error
  */
+/**
+ * @swagger
+ * /products/{productId}:
+ *   get:
+ *     summary: Get a single product by ID
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: productId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Product ID
+ *     responses:
+ *       200:
+ *         description: Product retrieved successfully
+ *       404:
+ *         description: Product not found
+ */
 
 /**
  * @swagger

@@ -7,7 +7,7 @@
 
 /**
  * @swagger
- * /cart:
+ * /cart/add-to:
  *   post:
  *     summary: Add a product to the cart
  *     tags: [Cart]
@@ -22,11 +22,14 @@
  *             required:
  *               - productId
  *               - quantity
+ *               - userId
  *             properties:
  *               productId:
  *                 type: string
  *               quantity:
  *                 type: number
+ *               userId:
+ *                 type: string
  *     responses:
  *       200:
  *         description: Item added or updated successfully
@@ -34,11 +37,13 @@
  *         description: Bad request
  *       401:
  *         description: Unauthorized
+ *       404:
+ *         description: Product not found
  */
 
 /**
  * @swagger
- * /cart:
+ * /cart/get-all-items:
  *   get:
  *     summary: Get all items in the user's cart
  *     tags: [Cart]
@@ -90,7 +95,7 @@
 
 /**
  * @swagger
- * /cart/{itemId}:
+ * /cart/update/{itemId}:
  *   patch:
  *     summary: Update quantity of a cart item
  *     tags: [Cart]
@@ -127,7 +132,7 @@
 
 /**
  * @swagger
- * /cart/{itemId}:
+ * /cart/remove/{itemId}:
  *   delete:
  *     summary: Remove a cart item
  *     tags: [Cart]
@@ -151,7 +156,7 @@
 
 /**
  * @swagger
- * /cart:
+ * /cart/clear:
  *   delete:
  *     summary: Clear the entire cart
  *     tags: [Cart]

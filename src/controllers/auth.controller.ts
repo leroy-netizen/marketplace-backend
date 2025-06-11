@@ -1,6 +1,7 @@
-import { Request, Response, RequestHandler } from "express";
+import { Request, Response } from "express";
+import { verifyRefreshToken } from "../utils/jwt";
 import jwt from "jsonwebtoken";
-import { RefreshToken } from "../entities/RefreshToken";
+import { RefreshToken } from "../entities/RefreshToken.entity";
 import {
   forgotPasswordService,
   registerUser,
@@ -50,16 +51,16 @@ export const refreshAccessToken = async (
   }
 
   try {
-    const payload = jwt.verify(
-      refreshToken,
-      process.env.JWT_REFRESH_SECRET!
-    ) as {
+    const payload = verifyRefreshToken(refreshToken) as {
       userId: string;
     };
 
     const repo = AppDataSource.getRepository(RefreshToken);
     const tokenInDb = await repo.findOne({
-      where: { token: refreshToken },
+      where: {
+        token: refreshToken,
+        user: { id: payload.userId },
+      },
       relations: ["user"],
     });
 

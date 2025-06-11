@@ -2,14 +2,15 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { AppDataSource } from "./config/db.config";
-import authRoutes from "./routes/auth.routes";
-import productRoutes from "./routes/products.routes";
+
 import path from "path";
 import { swaggerUi, swaggerSpec } from "./config/swagger.config";
+import { authRoutes, productRoutes, cartRoutes } from "./routes";
 
 dotenv.config();
 
 const app = express();
+app.use(cors({ origin: "*" }));
 
 app.use(cors());
 app.use(express.json());
@@ -18,6 +19,9 @@ app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 //auth routes
 app.use("/api/auth", authRoutes);
+
+//cart routes
+app.use("/api/cart", cartRoutes);
 
 //product routes
 app.use("/api/products", productRoutes);

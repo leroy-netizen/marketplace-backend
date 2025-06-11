@@ -4,6 +4,7 @@ import {
   deleteProduct,
   getAllProducts,
   getPredictiveSuggestions,
+  getProductById,
   getProductsBySeller,
   getSellerProducts,
   updateProduct,
@@ -14,7 +15,7 @@ import { AuthenticatedRequest } from "../types";
 export const createProductController = async (
   req: AuthenticatedRequest,
   res: Response
-) => {
+): Promise<void> => {
   const files = req.files as Express.Multer.File[];
   const imagePaths = files.map((file) => file.path);
   try {
@@ -22,7 +23,8 @@ export const createProductController = async (
     const user = req.user; // from auth middleware
 
     if (!user) {
-      return res.status(401).json({ message: "Unauthorized" });
+      res.status(401).json({ message: "Unauthorized" });
+      return;
     }
 
     const product = await createProduct({
@@ -34,12 +36,13 @@ export const createProductController = async (
       sellerId: user.id,
     });
 
-    return res.status(201).json({
+    res.status(201).json({
       message: "Product created successfully",
       data: product,
     });
+    return;
   } catch (error: any) {
-    return res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error.message });
   }
 };
 
@@ -57,6 +60,22 @@ export const getSellerProductsController = async (
     });
   } catch (error: any) {
     return res.status(500).json({ message: error.message });
+  }
+};
+export const getProductByIdController = async (req: Request, res: Response) => {
+  try {
+    const productId = req.params.id;
+    const product = await getProductById(productId);
+    if (!product) {
+      res.status(400).json({ message: "Product not found" });
+      return;
+    }
+    res
+      .status(200)
+      .json({ message: "Product fetched successfully", data: product });
+  } catch (err: any) {
+    res.status(500).json({ message: err.message });
+    return;
   }
 };
 

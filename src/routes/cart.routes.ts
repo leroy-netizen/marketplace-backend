@@ -3,20 +3,18 @@ import {
   getCartItems,
   addToCart,
   updateCartItem,
-  deleteCartItem,
+  removeCartItem,
   clearCart,
 } from "../controllers/cart.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 
-const router = express.Router();
+export const cartRoutes = express.Router();
 //@ts-ignore
 
-router.use(authenticate);
+cartRoutes.use(authenticate);
 
-router.get("/", getCartItems);
-router.post("/", addToCart);
-router.patch("/:itemId", updateCartItem);
-router.delete("/:itemId", deleteCartItem);
-router.delete("/", clearCart);
-
-export default router;
+cartRoutes.get("/get-all-items", authenticate, getCartItems);
+cartRoutes.post("/add-to", authenticate, addToCart);
+cartRoutes.patch("/update/:itemId", updateCartItem);
+cartRoutes.delete("/remove/:itemId", authenticate, removeCartItem);
+cartRoutes.delete("/clear", authenticate, clearCart);

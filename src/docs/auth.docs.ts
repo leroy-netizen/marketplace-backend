@@ -56,13 +56,40 @@
  *               email:
  *                 type: string
  *                 format: email
+ *                 example: teveca6671@jio1.com
  *               password:
  *                 type: string
+ *                 example: testPass
  *     responses:
  *       200:
  *         description: Authentication successful
  *       401:
  *         description: Invalid credentials
+ */
+
+/**
+ * @swagger
+ * /auth/refresh:
+ *   post:
+ *     summary: Refresh authentication token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 example: your-refresh-token-here
+ *     responses:
+ *       200:
+ *         description: Authentication token refreshed
+ *       401:
+ *         description: Invalid or expired token
  */
 
 /**

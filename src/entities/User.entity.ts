@@ -6,9 +6,9 @@ import {
   OneToMany,
 } from "typeorm";
 import { IsEmail, Length } from "class-validator";
-import { Product } from "./Product";
-import { RefreshToken } from "./RefreshToken";
-import { CartItem } from "./CartItem";
+import { Product } from "./Product.entity";
+import { RefreshToken } from "./RefreshToken.entity";
+import { CartItem } from "./CartItem.entity";
 
 export type UserRole = "buyer" | "seller" | "admin";
 

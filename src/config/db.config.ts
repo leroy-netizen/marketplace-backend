@@ -1,10 +1,10 @@
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
-import { Product } from "../entities/Product";
-import { RefreshToken } from "../entities/RefreshToken";
+import { Product } from "../entities/Product.entity";
+import { RefreshToken } from "../entities/RefreshToken.entity";
 import path from "path";
-import { User } from "../entities/User";
-import { CartItem } from "../entities/CartItem";
+import { User } from "../entities/User.entity";
+import { CartItem } from "../entities/CartItem.entity";
 
 dotenv.config();
 

@@ -9,14 +9,14 @@ import {
   resetPasswordController,
 } from "../controllers/auth.controller";
 
-const router = Router();
+export const authRoutes = Router();
 
-router.post("/signup", signup);
+authRoutes.post("/signup", signup);
 //@ts-ignore
-router.post("/signin", signin);
-router.post("/forgot-password", forgotPasswordController);
-router.post("/reset-password", resetPasswordController);
+authRoutes.post("/signin", signin);
+authRoutes.post("/forgot-password", forgotPasswordController);
+authRoutes.post("/reset-password", resetPasswordController);
 //@ts-ignore
-router.post("/refresh", refreshAccessToken);
+authRoutes.post("/refresh", refreshAccessToken);
 
-export default router;
+// export default router;

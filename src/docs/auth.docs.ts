@@ -69,6 +69,31 @@
 
 /**
  * @swagger
+ * /auth/refresh:
+ *   post:
+ *     summary: Refresh authentication token
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 example: your-refresh-token-here
+ *     responses:
+ *       200:
+ *         description: Authentication token refreshed
+ *       401:
+ *         description: Invalid or expired token
+ */
+
+/**
+ * @swagger
  * /auth/forgot-password:
  *   post:
  *     summary: Request password reset

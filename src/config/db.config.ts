@@ -5,6 +5,7 @@ import { RefreshToken } from "../entities/RefreshToken.entity";
 import path from "path";
 import { User } from "../entities/User.entity";
 import { CartItem } from "../entities/CartItem.entity";
+import { Order, OrderItem } from "../entities";
 
 dotenv.config();
 
@@ -19,6 +20,6 @@ export const AppDataSource = new DataSource({
   migrations: [path.join(__dirname, "../migration/*{.ts,.js}")],
   synchronize: process.env.RUNNING_ENV === "dev",
   logging: true,
-  entities: [User, Product, RefreshToken, CartItem],
+  entities: [User, Product, RefreshToken, CartItem, Order, OrderItem],
   // entities: [path.join(__dirname, "../entities/*.ts")],
 });

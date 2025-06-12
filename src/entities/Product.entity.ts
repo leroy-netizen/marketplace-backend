@@ -23,7 +23,10 @@ export class Product {
   price!: number;
 
   @Column()
-  category!: string; // e.g. "fruits", "vegetables"
+  category!: string;
+
+  @Column({ type: "int", default: 0 })
+  quantity!: number;
 
   @Column("simple-array", { nullable: true })
   images!: string[]; // store as comma-separated string in DB

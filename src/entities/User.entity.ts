@@ -9,6 +9,7 @@ import { IsEmail, Length } from "class-validator";
 import { Product } from "./Product.entity";
 import { RefreshToken } from "./RefreshToken.entity";
 import { CartItem } from "./CartItem.entity";
+import { Order } from ".";
 
 export type UserRole = "buyer" | "seller" | "admin";
 
@@ -44,5 +45,8 @@ export class User {
   @OneToMany(() => RefreshToken, (token) => token.user, {
     cascade: true,
   })
+  @OneToMany(() => Order, (order) => order.buyer)
+  orders!: Order[];
+
   refreshTokens!: RefreshToken[];
 }

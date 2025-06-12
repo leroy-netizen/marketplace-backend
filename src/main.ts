@@ -6,6 +6,7 @@ import { AppDataSource } from "./config/db.config";
 import path from "path";
 import { swaggerUi, swaggerSpec } from "./config/swagger.config";
 import { authRoutes, productRoutes, cartRoutes } from "./routes";
+import { orderRoutes } from "./routes/order.routes";
 
 dotenv.config();
 
@@ -26,6 +27,9 @@ app.use("/api/cart", cartRoutes);
 //product routes
 app.use("/api/products", productRoutes);
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+
+//order routes
+app.use("/api/orders", orderRoutes);
 
 const PORT = process.env.PORT || 5000;
 

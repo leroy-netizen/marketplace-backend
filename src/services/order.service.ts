@@ -1,5 +1,6 @@
 import { CartItem, OrderItem, User, Order, Product } from "../entities";
 import { AppDataSource } from "../config/db.config";
+import { sendEmail } from "../utils/mailer";
 
 export const createOrderFromCart = async (userId: string) => {
   const userRepo = AppDataSource.getRepository(User);
@@ -62,6 +63,15 @@ export const createOrderFromCart = async (userId: string) => {
   console.log(
     `Order created for user ID: ${userId} with total: ${order.total}`
   );
+  await sendEmail(
+    user.email,
+    `Your order has been created successfully`,
+    `
+    <h1>Order Confirmation</h1>
+    <p>Hello ${user.name},</p>
+    <p>Your order <strong>${order.id}</strong> has been created successfully. Soon to be processed</p>
+    `
+  );
 
   return order;
 };
@@ -116,5 +126,17 @@ export const updateOrderItemStatus = async (
   }
   //@ts-ignore
   orderItem.status = newStatus;
-  return await repo.save(orderItem);
+  await repo.save(orderItem);
+  const buyer = orderItem.order.buyer;
+  await sendEmail(
+    buyer.email,
+    `Your order item status has been updated`,
+    `
+      <h3>Order Update</h3>
+      <p>Hi ${buyer.name},</p>
+      <p>The item <strong>${orderItem.product.title}</strong> is now <strong>${newStatus.toUpperCase()}</strong>.</p>
+      <p>Thank you for shopping with us!</p>
+    `
+  );
+  return orderItem;
 };

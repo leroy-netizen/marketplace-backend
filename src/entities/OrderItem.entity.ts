@@ -20,6 +20,12 @@ export class OrderItem {
   priceAtOrder!: number;
   @Column("decimal", { precision: 10, scale: 2 })
   unitPrice!: number;
+  @Column({
+    type: "enum",
+    enum: ["PENDING", "SHIPPED", "DELIVERED"],
+    default: "PENDING",
+  })
+  status!: "PENDING" | "SHIPPED" | "DELIVERED";
 
   @Column("decimal", { precision: 10, scale: 2 })
   totalPrice!: number;

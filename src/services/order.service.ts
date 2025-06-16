@@ -1,5 +1,6 @@
 import { CartItem, OrderItem, User, Order, Product } from "../entities";
 import { AppDataSource } from "../config/db.config";
+import { sendEmail } from "../utils/mailer";
 
 export const createOrderFromCart = async (userId: string) => {
   const userRepo = AppDataSource.getRepository(User);
@@ -62,6 +63,80 @@ export const createOrderFromCart = async (userId: string) => {
   console.log(
     `Order created for user ID: ${userId} with total: ${order.total}`
   );
+  await sendEmail(
+    user.email,
+    `Your order has been created successfully`,
+    `
+    <h1>Order Confirmation</h1>
+    <p>Hello ${user.name},</p>
+    <p>Your order <strong>${order.id}</strong> has been created successfully. Soon to be processed</p>
+    `
+  );
 
   return order;
+};
+
+export const fetchBuyerOrders = async (buyerId: string) => {
+  return await AppDataSource.getRepository(Order).find({
+    where: { buyer: { id: buyerId } },
+    relations: ["orderItems", "orderItems.product"],
+    order: { createdAt: "DESC" },
+  });
+};
+
+export const fetchSellerOrders = async (sellerId: string) => {
+  return await AppDataSource.getRepository(OrderItem)
+    .createQueryBuilder("orderItem")
+    .leftJoinAndSelect("orderItem.order", "order")
+    .leftJoinAndSelect("order.buyer", "buyer")
+    .leftJoinAndSelect("orderItem.product", "product")
+    .where("product.sellerId = :sellerId", { sellerId })
+    .orderBy("order.createdAt", "DESC")
+    .getMany();
+};
+
+export const updateOrderItemStatus = async (
+  orderItemId: string,
+  newStatus: "SHIPPED" | "DELIVERED" | "CANCELLED",
+  sellerId: string
+) => {
+  const repo = AppDataSource.getRepository(OrderItem);
+
+  const orderItem = await repo.findOne({
+    where: { id: orderItemId },
+    relations: ["product"],
+  });
+
+  if (!orderItem) throw new Error("Order item not found");
+
+  if (orderItem.product.seller.id !== sellerId)
+    throw new Error("Unauthorized seller");
+
+  const allowedTransitions = {
+    PENDING: ["SHIPPED", "CANCELLED"],
+    SHIPPED: ["DELIVERED", "CANCELLED"],
+    DELIVERED: ["CANCELLED"],
+  };
+
+  const currentStatus = orderItem.status;
+  if (!allowedTransitions[currentStatus].includes(newStatus)) {
+    throw new Error(
+      `Invalid status transition: ${currentStatus} -> ${newStatus}`
+    );
+  }
+  //@ts-ignore
+  orderItem.status = newStatus;
+  await repo.save(orderItem);
+  const buyer = orderItem.order.buyer;
+  await sendEmail(
+    buyer.email,
+    `Your order item status has been updated`,
+    `
+      <h3>Order Update</h3>
+      <p>Hi ${buyer.name},</p>
+      <p>The item <strong>${orderItem.product.title}</strong> is now <strong>${newStatus.toUpperCase()}</strong>.</p>
+      <p>Thank you for shopping with us!</p>
+    `
+  );
+  return orderItem;
 };

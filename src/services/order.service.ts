@@ -65,3 +65,56 @@ export const createOrderFromCart = async (userId: string) => {
 
   return order;
 };
+
+export const fetchBuyerOrders = async (buyerId: string) => {
+  return await AppDataSource.getRepository(Order).find({
+    where: { buyer: { id: buyerId } },
+    relations: ["orderItems", "orderItems.product"],
+    order: { createdAt: "DESC" },
+  });
+};
+
+export const fetchSellerOrders = async (sellerId: string) => {
+  return await AppDataSource.getRepository(OrderItem)
+    .createQueryBuilder("orderItem")
+    .leftJoinAndSelect("orderItem.order", "order")
+    .leftJoinAndSelect("order.buyer", "buyer")
+    .leftJoinAndSelect("orderItem.product", "product")
+    .where("product.sellerId = :sellerId", { sellerId })
+    .orderBy("order.createdAt", "DESC")
+    .getMany();
+};
+
+export const updateOrderItemStatus = async (
+  orderItemId: string,
+  newStatus: "SHIPPED" | "DELIVERED" | "CANCELLED",
+  sellerId: string
+) => {
+  const repo = AppDataSource.getRepository(OrderItem);
+
+  const orderItem = await repo.findOne({
+    where: { id: orderItemId },
+    relations: ["product"],
+  });
+
+  if (!orderItem) throw new Error("Order item not found");
+
+  if (orderItem.product.seller.id !== sellerId)
+    throw new Error("Unauthorized seller");
+
+  const allowedTransitions = {
+    PENDING: ["SHIPPED", "CANCELLED"],
+    SHIPPED: ["DELIVERED", "CANCELLED"],
+    DELIVERED: ["CANCELLED"],
+  };
+
+  const currentStatus = orderItem.status;
+  if (!allowedTransitions[currentStatus].includes(newStatus)) {
+    throw new Error(
+      `Invalid status transition: ${currentStatus} -> ${newStatus}`
+    );
+  }
+  //@ts-ignore
+  orderItem.status = newStatus;
+  return await repo.save(orderItem);
+};

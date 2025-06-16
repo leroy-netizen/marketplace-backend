@@ -55,7 +55,7 @@ importers:
         version: 5.0.1(express@5.1.0)
       typeorm:
         specifier: ^0.3.24
-        version: 0.3.24(pg@8.16.0)(redis@5.5.6)(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@22.15.21)(typescript@5.8.3))
+        version: 0.3.24(pg@8.16.0)(redis@5.5.6)(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@22.15.31)(typescript@5.8.3))
     devDependencies:
       '@types/bcrypt':
         specifier: ^5.0.2
@@ -74,7 +74,7 @@ importers:
         version: 1.4.12
       '@types/node':
         specifier: ^22.15.21
-        version: 22.15.21
+        version: 22.15.31
       '@types/nodemailer':
         specifier: ^6.4.17
         version: 6.4.17
@@ -86,7 +86,7 @@ importers:
         version: 4.1.8
       cz-conventional-changelog:
         specifier: ^3.3.0
-        version: 3.3.0(@types/node@22.15.21)(typescript@5.8.3)
+        version: 3.3.0(@types/node@22.15.31)(typescript@5.8.3)
       eslint:
         specifier: ^9.27.0
         version: 9.29.0(jiti@2.4.2)
@@ -95,10 +95,10 @@ importers:
         version: 3.5.3
       ts-node:
         specifier: ^10.9.2
-        version: 10.9.2(@types/node@22.15.21)(typescript@5.8.3)
+        version: 10.9.2(@types/node@22.15.31)(typescript@5.8.3)
       ts-node-dev:
         specifier: ^2.0.0
-        version: 2.0.0(@types/node@22.15.21)(typescript@5.8.3)
+        version: 2.0.0(@types/node@22.15.31)(typescript@5.8.3)
       typescript:
         specifier: ^5.8.3
         version: 5.8.3
@@ -326,8 +326,8 @@ packages:
   '@types/multer@1.4.12':
     resolution: {integrity: sha512-pQ2hoqvXiJt2FP9WQVLPRO+AmiIm/ZYkavPlIQnx282u4ZrVdztx0pkh3jjpQt0Kz+YI0YhSG264y08UJKoUQg==}
 
-  '@types/node@22.15.21':
-    resolution: {integrity: sha512-EV/37Td6c+MgKAbkcLG6vqZ2zEYHD7bvSrzqqs2RIhbA6w3x+Dqz8MZM3sP6kGTeLrdoOgKZe+Xja7tUB2DNkQ==}
+  '@types/node@22.15.31':
+    resolution: {integrity: sha512-jnVe5ULKl6tijxUhvQeNbQG/84fHfg+yMak02cT8QVhBx/F05rAVxCGBYYTh2EKz22D6JF5ktXuNwdx7b9iEGw==}
 
   '@types/nodemailer@6.4.17':
     resolution: {integrity: sha512-I9CCaIp6DTldEg7vyUTZi8+9Vo0hi1/T8gv3C89yk1rSAAzoKQ8H8ki/jBYJSFoH/BisgLP8tkZMlQ91CIquww==}
@@ -1976,7 +1976,7 @@ snapshots:
   '@commitlint/execute-rule@19.8.1':
     optional: true
 
-  '@commitlint/load@19.8.1(@types/node@22.15.21)(typescript@5.8.3)':
+  '@commitlint/load@19.8.1(@types/node@22.15.31)(typescript@5.8.3)':
     dependencies:
       '@commitlint/config-validator': 19.8.1
       '@commitlint/execute-rule': 19.8.1
@@ -1984,7 +1984,7 @@ snapshots:
       '@commitlint/types': 19.8.1
       chalk: 5.4.1
       cosmiconfig: 9.0.0(typescript@5.8.3)
-      cosmiconfig-typescript-loader: 6.1.0(@types/node@22.15.21)(cosmiconfig@9.0.0(typescript@5.8.3))(typescript@5.8.3)
+      cosmiconfig-typescript-loader: 6.1.0(@types/node@22.15.31)(cosmiconfig@9.0.0(typescript@5.8.3))(typescript@5.8.3)
       lodash.isplainobject: 4.0.6
       lodash.merge: 4.6.2
       lodash.uniq: 4.5.0
@@ -2133,31 +2133,31 @@ snapshots:
 
   '@types/bcrypt@5.0.2':
     dependencies:
-      '@types/node': 22.15.21
+      '@types/node': 22.15.31
 
   '@types/body-parser@1.19.5':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 22.15.21
+      '@types/node': 22.15.31
 
   '@types/connect@3.4.38':
     dependencies:
-      '@types/node': 22.15.21
+      '@types/node': 22.15.31
 
   '@types/conventional-commits-parser@5.0.1':
     dependencies:
-      '@types/node': 22.15.21
+      '@types/node': 22.15.31
     optional: true
 
   '@types/cors@2.8.18':
     dependencies:
-      '@types/node': 22.15.21
+      '@types/node': 22.15.31
 
   '@types/estree@1.0.8': {}
 
   '@types/express-serve-static-core@5.0.6':
     dependencies:
-      '@types/node': 22.15.21
+      '@types/node': 22.15.31
       '@types/qs': 6.14.0
       '@types/range-parser': 1.2.7
       '@types/send': 0.17.4
@@ -2175,7 +2175,7 @@ snapshots:
   '@types/jsonwebtoken@9.0.10':
     dependencies:
       '@types/ms': 2.1.0
-      '@types/node': 22.15.21
+      '@types/node': 22.15.31
 
   '@types/mime@1.3.5': {}
 
@@ -2185,13 +2185,13 @@ snapshots:
     dependencies:
       '@types/express': 5.0.2
 
-  '@types/node@22.15.21':
+  '@types/node@22.15.31':
     dependencies:
       undici-types: 6.21.0
 
   '@types/nodemailer@6.4.17':
     dependencies:
-      '@types/node': 22.15.21
+      '@types/node': 22.15.31
 
   '@types/qs@6.14.0': {}
 
@@ -2200,12 +2200,12 @@ snapshots:
   '@types/send@0.17.4':
     dependencies:
       '@types/mime': 1.3.5
-      '@types/node': 22.15.21
+      '@types/node': 22.15.31
 
   '@types/serve-static@1.15.7':
     dependencies:
       '@types/http-errors': 2.0.4
-      '@types/node': 22.15.21
+      '@types/node': 22.15.31
       '@types/send': 0.17.4
 
   '@types/strip-bom@3.0.0': {}
@@ -2444,10 +2444,10 @@ snapshots:
   commander@9.5.0:
     optional: true
 
-  commitizen@4.3.1(@types/node@22.15.21)(typescript@5.8.3):
+  commitizen@4.3.1(@types/node@22.15.31)(typescript@5.8.3):
     dependencies:
       cachedir: 2.3.0
-      cz-conventional-changelog: 3.3.0(@types/node@22.15.21)(typescript@5.8.3)
+      cz-conventional-changelog: 3.3.0(@types/node@22.15.31)(typescript@5.8.3)
       dedent: 0.7.0
       detect-indent: 6.1.0
       find-node-modules: 2.1.3
@@ -2490,9 +2490,9 @@ snapshots:
       object-assign: 4.1.1
       vary: 1.1.2
 
-  cosmiconfig-typescript-loader@6.1.0(@types/node@22.15.21)(cosmiconfig@9.0.0(typescript@5.8.3))(typescript@5.8.3):
+  cosmiconfig-typescript-loader@6.1.0(@types/node@22.15.31)(cosmiconfig@9.0.0(typescript@5.8.3))(typescript@5.8.3):
     dependencies:
-      '@types/node': 22.15.21
+      '@types/node': 22.15.31
       cosmiconfig: 9.0.0(typescript@5.8.3)
       jiti: 2.4.2
       typescript: 5.8.3
@@ -2516,16 +2516,16 @@ snapshots:
       shebang-command: 2.0.0
       which: 2.0.2
 
-  cz-conventional-changelog@3.3.0(@types/node@22.15.21)(typescript@5.8.3):
+  cz-conventional-changelog@3.3.0(@types/node@22.15.31)(typescript@5.8.3):
     dependencies:
       chalk: 2.4.2
-      commitizen: 4.3.1(@types/node@22.15.21)(typescript@5.8.3)
+      commitizen: 4.3.1(@types/node@22.15.31)(typescript@5.8.3)
       conventional-commit-types: 3.0.0
       lodash.map: 4.6.0
       longest: 2.0.1
       word-wrap: 1.2.5
     optionalDependencies:
-      '@commitlint/load': 19.8.1(@types/node@22.15.21)(typescript@5.8.3)
+      '@commitlint/load': 19.8.1(@types/node@22.15.31)(typescript@5.8.3)
     transitivePeerDependencies:
       - '@types/node'
       - typescript
@@ -2593,7 +2593,7 @@ snapshots:
   engine.io@6.6.4:
     dependencies:
       '@types/cors': 2.8.18
-      '@types/node': 22.15.21
+      '@types/node': 22.15.31
       accepts: 1.3.8
       base64id: 2.0.0
       cookie: 0.7.2
@@ -3633,7 +3633,7 @@ snapshots:
 
   tree-kill@1.2.2: {}
 
-  ts-node-dev@2.0.0(@types/node@22.15.21)(typescript@5.8.3):
+  ts-node-dev@2.0.0(@types/node@22.15.31)(typescript@5.8.3):
     dependencies:
       chokidar: 3.6.0
       dynamic-dedupe: 0.3.0
@@ -3643,7 +3643,7 @@ snapshots:
       rimraf: 2.7.1
       source-map-support: 0.5.21
       tree-kill: 1.2.2
-      ts-node: 10.9.2(@types/node@22.15.21)(typescript@5.8.3)
+      ts-node: 10.9.2(@types/node@22.15.31)(typescript@5.8.3)
       tsconfig: 7.0.0
       typescript: 5.8.3
     transitivePeerDependencies:
@@ -3651,14 +3651,14 @@ snapshots:
       - '@swc/wasm'
       - '@types/node'
 
-  ts-node@10.9.2(@types/node@22.15.21)(typescript@5.8.3):
+  ts-node@10.9.2(@types/node@22.15.31)(typescript@5.8.3):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 22.15.21
+      '@types/node': 22.15.31
       acorn: 8.14.1
       acorn-walk: 8.3.4
       arg: 4.1.3
@@ -3697,7 +3697,7 @@ snapshots:
 
   typedarray@0.0.6: {}
 
-  typeorm@0.3.24(pg@8.16.0)(redis@5.5.6)(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@22.15.21)(typescript@5.8.3)):
+  typeorm@0.3.24(pg@8.16.0)(redis@5.5.6)(reflect-metadata@0.2.2)(ts-node@10.9.2(@types/node@22.15.31)(typescript@5.8.3)):
     dependencies:
       '@sqltools/formatter': 1.2.5
       ansis: 3.17.0
@@ -3717,7 +3717,7 @@ snapshots:
     optionalDependencies:
       pg: 8.16.0
       redis: 5.5.6
-      ts-node: 10.9.2(@types/node@22.15.21)(typescript@5.8.3)
+      ts-node: 10.9.2(@types/node@22.15.31)(typescript@5.8.3)
     transitivePeerDependencies:
       - babel-plugin-macros
       - supports-color

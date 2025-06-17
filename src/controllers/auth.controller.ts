@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { verifyRefreshToken } from "../utils/jwt";
-import jwt from "jsonwebtoken";
-import { RefreshToken } from "../entities/RefreshToken.entity";
+import { RefreshToken, User } from "../entities";
 import {
   forgotPasswordService,
   registerUser,
@@ -23,6 +22,9 @@ export const signup = async (req: Request, res: Response) => {
         email: user.email,
         role: user.role,
         userVerified: user.isVerified,
+
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       },
     });
   } catch (error: any) {
@@ -96,4 +98,32 @@ export const resetPasswordController = async (req: Request, res: Response) => {
   } catch (err: any) {
     res.status(400).json({ message: err.message });
   }
+};
+
+// controllers/admin.controller.ts
+
+const allowedRoles = ["admin", "seller", "buyer"];
+
+export const updateUserRole = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { role } = req.body;
+
+  if (!allowedRoles.includes(role)) {
+    res.status(400).json({ message: "Invalid role provided" });
+    return;
+  }
+
+  const repo = AppDataSource.getRepository(User);
+  const user = await repo.findOneBy({ id });
+
+  if (!user) {
+    res.status(404).json({ message: "User not found" });
+    return;
+  }
+
+  user.role = role;
+  await repo.save(user);
+
+  res.status(200).json({ message: `User role updated to ${role}` });
+  return;
 };

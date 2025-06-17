@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   OneToMany,
+  UpdateDateColumn,
 } from "typeorm";
 import { IsEmail, Length } from "class-validator";
 import { Product } from "./Product.entity";
@@ -37,6 +38,8 @@ export class User {
 
   @CreateDateColumn()
   createdAt!: Date;
+  @UpdateDateColumn()
+  updatedAt!: Date;
   @OneToMany(() => CartItem, (cartItem) => cartItem.user, { eager: false })
   cartItems!: CartItem[];
 

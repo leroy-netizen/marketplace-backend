@@ -159,7 +159,7 @@
  *     tags: [Products]
  *     parameters:
  *       - in: query
- *         name: q
+ *         name: query
  *         required: true
  *         schema:
  *           type: string

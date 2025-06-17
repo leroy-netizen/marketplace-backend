@@ -33,5 +33,14 @@ export const authenticate = (
     next();
   } catch (err) {
     res.status(401).json({ message: "Invalid token" });
+    return;
   }
 };
+export function authRbac(role: "admin") {
+  return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
+    console.log("User role >>:", req.user?.role);
+    console.log("Required role >>:", role);
+    if (req.user?.role !== role) res.status(403).json({ error: "Forbidden. Only admins can perform this operation" });
+    next();
+  };
+}

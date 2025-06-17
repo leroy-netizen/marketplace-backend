@@ -5,7 +5,7 @@ const OTP_RATE_LIMIT = 5;
 const RATE_LIMIT_WINDOW = 600; // 10 minutes
 
 export const setOTP = async (email: string, otp: string) => {
-  await redisClient.setEx(`otp:${email}`, 300, otp); // 5 mins
+  await redisClient.setEx(`otp:${email}`, OTP_EXPIRY_SECONDS, otp); // 5 mins
 };
 
 export const getOTP = async (email: string) => {

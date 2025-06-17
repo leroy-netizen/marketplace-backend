@@ -14,13 +14,17 @@ import {
 export const authRoutes = Router();
 
 authRoutes.post("/signup", signup);
-//@ts-ignore
+
 authRoutes.post("/signin", signin);
 authRoutes.post("/forgot-password", forgotPasswordController);
 authRoutes.post("/reset-password", resetPasswordController);
+
 //@ts-ignore
 authRoutes.post("/refresh", refreshAccessToken);
 
-authRoutes.patch("/users/:id/role",authenticate, authRbac("admin"), updateUserRole);
-
-
+authRoutes.patch(
+  "/users/:id/role",
+  authenticate,
+  authRbac("admin"),
+  updateUserRole
+);

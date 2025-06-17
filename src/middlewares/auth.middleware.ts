@@ -17,14 +17,14 @@ export const authenticate = (
     hasAuthHeader: !!authHeader,
     headerStartsWithBearer: authHeader?.startsWith("Bearer ") || false,
     path: req.path,
-    method: req.method
+    method: req.method,
   });
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
     logger.warn("Authentication failed - No token provided", {
       path: req.path,
       method: req.method,
-      ip: req.ip
+      ip: req.ip,
     });
     res.status(401).json({ message: "No token provided" });
     return;
@@ -41,7 +41,7 @@ export const authenticate = (
     logger.debug("Token verified successfully", {
       userId: decoded.id,
       userRole: decoded.role,
-      path: req.path
+      path: req.path,
     });
 
     req.user = {
@@ -55,7 +55,7 @@ export const authenticate = (
       error: err instanceof Error ? err.message : "Unknown error",
       path: req.path,
       method: req.method,
-      ip: req.ip
+      ip: req.ip,
     });
     res.status(401).json({ message: "Invalid token" });
     return;
@@ -66,17 +66,19 @@ export function authRbac(role: "admin") {
     logger.debug("RBAC check", {
       userRole: req.user?.role,
       requiredRole: role,
-      path: req.path
+      path: req.path,
     });
-    
     if (req.user?.role !== role) {
       logger.warn("RBAC authorization failed", {
         userRole: req.user?.role,
         requiredRole: role,
         userId: req.user?.id,
-        path: req.path
+        path: req.path,
       });
-      return res.status(403).json({ error: "Forbidden. Only admins can perform this operation" });
+      res
+        .status(403)
+        .json({ error: "Forbidden. Only admins can perform this operation" });
+      return;
     }
     next();
   };

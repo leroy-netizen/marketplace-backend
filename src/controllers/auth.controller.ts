@@ -9,6 +9,8 @@ import {
 } from "../services/auth.service";
 import { AppDataSource } from "../config/db.config";
 import { signAccessToken } from "../utils/jwt";
+import { AuthenticatedRequest } from "../types";
+import logger from "../utils/logger";
 
 export const signup = async (req: Request, res: Response) => {
   const { name, email, password, role } = req.body;
@@ -36,9 +38,11 @@ export const signin = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
     const data = await userLogin(email, password);
-    return res.status(200).json(data);
+    res.status(200).json(data);
+    return;
   } catch (error: any) {
-    return res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error.message });
+    return;
   }
 };
 
@@ -77,7 +81,12 @@ export const refreshAccessToken = async (
 
     return res.status(200).json({ accessToken: newAccessToken });
   } catch (err) {
-    return res.status(403).json({ message: "Invalid or expired token" });
+    res.status(403).json({ message: "Invalid or expired token" });
+    logger.error("Error refreshing access token", {
+      error: err instanceof Error ? err.message : "Unknown error",
+    });
+    // @ts-ignore
+    return;
   }
 };
 export const forgotPasswordController = async (req: Request, res: Response) => {
@@ -104,7 +113,10 @@ export const resetPasswordController = async (req: Request, res: Response) => {
 
 const allowedRoles = ["admin", "seller", "buyer"];
 
-export const updateUserRole = async (req: Request, res: Response) => {
+export const updateUserRole = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
   const { id } = req.params;
   const { role } = req.body;
 

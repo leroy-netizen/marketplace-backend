@@ -35,6 +35,7 @@ export const userLogin = async (email: string, password: string) => {
   const normalizedEmail = email.trim().toLowerCase();
   const userFound = await userRepo.findOne({
     where: { email: normalizedEmail },
+    select: ["id", "email", "name", "password", "role", "isVerified"],
   });
 
   if (!userFound) {

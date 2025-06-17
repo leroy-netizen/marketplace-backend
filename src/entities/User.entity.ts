@@ -27,7 +27,7 @@ export class User {
   @IsEmail()
   email!: string;
 
-  @Column()
+  @Column({select: false})
   password!: string;
 
   @Column({ type: "varchar", default: "buyer" })

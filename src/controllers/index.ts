@@ -3,9 +3,9 @@ export * from "./product.controller";
 export * from "./cart.controller";
 export * from "./conversation.controller";
 export {
-  createMessage,
   fetchMessages,
+  createMessage,
   removeMessageForUser,
   removeMessageForEveryone,
   readMessage,
-} from "./Message.controller";
+} from "./message.controller";

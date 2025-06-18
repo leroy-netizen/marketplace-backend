@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { AuthenticatedRequest } from "../types";
 import dotenv from "dotenv";
+import logger from "../utils/logger";
 
 dotenv.config();
 
@@ -12,7 +13,19 @@ export const authenticate = (
 ) => {
   const authHeader = req.headers.authorization;
 
+  logger.debug("Authentication attempt", {
+    hasAuthHeader: !!authHeader,
+    headerStartsWithBearer: authHeader?.startsWith("Bearer ") || false,
+    path: req.path,
+    method: req.method,
+  });
+
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    logger.warn("Authentication failed - No token provided", {
+      path: req.path,
+      method: req.method,
+      ip: req.ip,
+    });
     res.status(401).json({ message: "No token provided" });
     return;
   }
@@ -25,6 +38,12 @@ export const authenticate = (
       role: string;
     };
 
+    logger.debug("Token verified successfully", {
+      userId: decoded.id,
+      userRole: decoded.role,
+      path: req.path,
+    });
+
     req.user = {
       id: decoded.id,
       role: decoded.role,
@@ -32,15 +51,35 @@ export const authenticate = (
 
     next();
   } catch (err) {
+    logger.error("Token verification failed", {
+      error: err instanceof Error ? err.message : "Unknown error",
+      path: req.path,
+      method: req.method,
+      ip: req.ip,
+    });
     res.status(401).json({ message: "Invalid token" });
     return;
   }
 };
 export function authRbac(role: "admin") {
   return (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    console.log("User role >>:", req.user?.role);
-    console.log("Required role >>:", role);
-    if (req.user?.role !== role) res.status(403).json({ error: "Forbidden. Only admins can perform this operation" });
+    logger.debug("RBAC check", {
+      userRole: req.user?.role,
+      requiredRole: role,
+      path: req.path,
+    });
+    if (req.user?.role !== role) {
+      logger.warn("RBAC authorization failed", {
+        userRole: req.user?.role,
+        requiredRole: role,
+        userId: req.user?.id,
+        path: req.path,
+      });
+      res
+        .status(403)
+        .json({ error: "Forbidden. Only admins can perform this operation" });
+      return;
+    }
     next();
   };
 }

@@ -3,7 +3,9 @@ import {
   refreshAccessToken,
   signin,
   signup,
+  updateUserRole,
 } from "../controllers/auth.controller";
+import { authRbac, authenticate } from "../middlewares/auth.middleware";
 import {
   forgotPasswordController,
   resetPasswordController,
@@ -12,11 +14,17 @@ import {
 export const authRoutes = Router();
 
 authRoutes.post("/signup", signup);
-//@ts-ignore
+
 authRoutes.post("/signin", signin);
 authRoutes.post("/forgot-password", forgotPasswordController);
 authRoutes.post("/reset-password", resetPasswordController);
+
 //@ts-ignore
 authRoutes.post("/refresh", refreshAccessToken);
 
-// export default router;
+authRoutes.patch(
+  "/users/:id/role",
+  authenticate,
+  authRbac("admin"),
+  updateUserRole
+);

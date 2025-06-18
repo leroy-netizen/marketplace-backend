@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { verifyRefreshToken } from "../utils/jwt";
-import jwt from "jsonwebtoken";
-import { RefreshToken } from "../entities/RefreshToken.entity";
+import { RefreshToken, User } from "../entities";
 import {
   forgotPasswordService,
   registerUser,
@@ -10,6 +9,8 @@ import {
 } from "../services/auth.service";
 import { AppDataSource } from "../config/db.config";
 import { signAccessToken } from "../utils/jwt";
+import { AuthenticatedRequest } from "../types";
+import logger from "../utils/logger";
 
 export const signup = async (req: Request, res: Response) => {
   const { name, email, password, role } = req.body;
@@ -23,6 +24,9 @@ export const signup = async (req: Request, res: Response) => {
         email: user.email,
         role: user.role,
         userVerified: user.isVerified,
+
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       },
     });
   } catch (error: any) {
@@ -34,9 +38,11 @@ export const signin = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   try {
     const data = await userLogin(email, password);
-    return res.status(200).json(data);
+    res.status(200).json(data);
+    return;
   } catch (error: any) {
-    return res.status(400).json({ message: error.message });
+    res.status(400).json({ message: error.message });
+    return;
   }
 };
 
@@ -75,7 +81,12 @@ export const refreshAccessToken = async (
 
     return res.status(200).json({ accessToken: newAccessToken });
   } catch (err) {
-    return res.status(403).json({ message: "Invalid or expired token" });
+    res.status(403).json({ message: "Invalid or expired token" });
+    logger.error("Error refreshing access token", {
+      error: err instanceof Error ? err.message : "Unknown error",
+    });
+    // @ts-ignore
+    return;
   }
 };
 export const forgotPasswordController = async (req: Request, res: Response) => {
@@ -96,4 +107,35 @@ export const resetPasswordController = async (req: Request, res: Response) => {
   } catch (err: any) {
     res.status(400).json({ message: err.message });
   }
+};
+
+// controllers/admin.controller.ts
+
+const allowedRoles = ["admin", "seller", "buyer"];
+
+export const updateUserRole = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  const { id } = req.params;
+  const { role } = req.body;
+
+  if (!allowedRoles.includes(role)) {
+    res.status(400).json({ message: "Invalid role provided" });
+    return;
+  }
+
+  const repo = AppDataSource.getRepository(User);
+  const user = await repo.findOneBy({ id });
+
+  if (!user) {
+    res.status(404).json({ message: "User not found" });
+    return;
+  }
+
+  user.role = role;
+  await repo.save(user);
+
+  res.status(200).json({ message: `User role updated to ${role}` });
+  return;
 };

@@ -143,3 +143,45 @@
  *       400:
  *         description: Invalid or expired token
  */
+
+/**
+ * @swagger
+ * /auth/users/{id}/role:
+ *   patch:
+ *     summary: Update user role (only for admins)
+ *     description: Allows an admin to update the role of a user. This endpoint is protected and requires admin privileges.
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: User ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - role
+ *             properties:
+ *               role:
+ *                 type: string
+ *                 enum: [admin, seller, buyer]
+ *                 example: seller
+ *     responses:
+ *       200:
+ *         description: Role updated successfully
+ *       400:
+ *         description: Invalid role
+ *       403:
+ *         description: Forbidden - Admins only
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Internal server error
+ */

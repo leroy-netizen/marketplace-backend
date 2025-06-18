@@ -4,6 +4,7 @@ import {
   Column,
   CreateDateColumn,
   OneToMany,
+  UpdateDateColumn,
 } from "typeorm";
 import { IsEmail, Length } from "class-validator";
 import { Product } from "./Product.entity";
@@ -26,7 +27,7 @@ export class User {
   @IsEmail()
   email!: string;
 
-  @Column()
+  @Column({select: false})
   password!: string;
 
   @Column({ type: "varchar", default: "buyer" })
@@ -37,6 +38,8 @@ export class User {
 
   @CreateDateColumn()
   createdAt!: Date;
+  @UpdateDateColumn()
+  updatedAt!: Date;
   @OneToMany(() => CartItem, (cartItem) => cartItem.user, { eager: false })
   cartItems!: CartItem[];
 

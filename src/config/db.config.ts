@@ -1,11 +1,7 @@
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
-import { Product } from "../entities/Product.entity";
-import { RefreshToken } from "../entities/RefreshToken.entity";
 import path from "path";
-import { User } from "../entities/User.entity";
-import { CartItem } from "../entities/CartItem.entity";
-import { Order, OrderItem } from "../entities";
+import { User, Product, RefreshToken, CartItem, Order, OrderItem, Conversation, Message } from "../entities";
 
 dotenv.config();
 
@@ -20,6 +16,7 @@ export const AppDataSource = new DataSource({
   migrations: [path.join(__dirname, "../migration/*{.ts,.js}")],
   synchronize: process.env.RUNNING_ENV === "dev",
   logging: true,
-  entities: [User, Product, RefreshToken, CartItem, Order, OrderItem],
-  // entities: [path.join(__dirname, "../entities/*.ts")],
+  entities: [User, Product, RefreshToken, CartItem, Order, OrderItem, Conversation, Message],
+  // Alternatively, you can use the glob pattern:
+  // entities: [path.join(__dirname, "../entities/*.entity.ts")],
 });

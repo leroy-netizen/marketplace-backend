@@ -3,7 +3,7 @@ import app from '../../main';
 
 
 // Mock the database connection
-jest.mock('../../../config/db.config', () => ({
+jest.mock('../../config/db.config', () => ({
   AppDataSource: {
     initialize: jest.fn().mockResolvedValue({}),
     getRepository: jest.fn().mockImplementation(() => ({

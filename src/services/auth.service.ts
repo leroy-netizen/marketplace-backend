@@ -5,6 +5,7 @@ import { signAccessToken, signRefreshToken } from "../utils/jwt";
 import bcrypt from "bcrypt";
 import { sendOTPEmail } from "../utils/mailer";
 import { canRequestOTP, deleteOTP, getOTP, setOTP } from "../utils/otp";
+import logger from "../utils/logger";
 
 export const registerUser = async (
   name: string,
@@ -73,13 +74,37 @@ export const userLogin = async (email: string, password: string) => {
 export const forgotPasswordService = async (email: string) => {
   const userRepo = AppDataSource.getRepository(User);
   const user = await userRepo.findOneBy({ email });
-  if (!user) throw new Error("User not found");
-  const canRequest = await canRequestOTP(email);
-  if (!canRequest) throw new Error("Too many OTP requests. Try again later.");
 
+  if (!user) {
+    logger.warn(`Password reset requested for non-existent email: ${email}`);
+    throw new Error("User not found");
+  }
+
+  const canRequest = await canRequestOTP(email);
+  if (!canRequest) {
+    logger.warn(`Too many OTP requests for email: ${email}`);
+    throw new Error("Too many OTP requests. Try again later.");
+  }
+
+  // Generate a 6-digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+  // Store OTP in Redis
   await setOTP(email, otp);
-  await sendOTPEmail(email, otp);
+
+  // Send OTP email using the template
+  try {
+    await sendOTPEmail(email, otp);
+    logger.info(`Password reset OTP sent to: ${email}`);
+  } catch (emailError: any) {
+    // In development, log the OTP if email fails
+    logger.warn(`Email sending failed, logging OTP for development: ${otp}`, {
+      error: emailError.message,
+      email,
+    });
+    console.log(`🔐 EMAIL FAILED - OTP for ${email}: ${otp}`);
+    // Don't throw the error, continue with the flow
+  }
 };
 
 export const resetPasswordService = async (

@@ -36,7 +36,16 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  logger.error(`Error: ${err.message}`, {
+  // Check if err is defined before accessing properties
+  if (!err) {
+    logger.error("Error handler called with undefined error");
+    return res.status(500).json({
+      error: "Internal Server Error",
+      message: "An unknown error occurred",
+    });
+  }
+
+  logger.error(`Error: ${err.message || 'Unknown error'}`, {
     stack: err.stack,
     path: req.path,
     method: req.method,
@@ -79,6 +88,6 @@ export const errorHandler = (
     error: "Internal Server Error",
     message: process.env.NODE_ENV === "production"
       ? "An unexpected error occurred"
-      : err.message,
+      : (err.message || "Unknown error"),
   });
 };

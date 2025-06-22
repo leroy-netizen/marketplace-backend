@@ -22,6 +22,7 @@ import {
 import { errorHandler } from "./middlewares/error.middleware";
 import { messageRoutes } from "./routes/messages.routes";
 
+// Register global error handlers
 process.on("unhandledRejection", logUnhandledRejection);
 process.on("uncaughtException", logUncaughtException);
 
@@ -45,9 +46,10 @@ app.use("/api/admin/orders", orderAdminRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/messages", messageRoutes);
 
+
 app.use(logError);
-//@ts-ignore
-app.use(errorHandler());
+// @ts-ignore
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
@@ -65,4 +67,4 @@ AppDataSource.initialize()
     });
   });
 
-export default app;
+export default app; 

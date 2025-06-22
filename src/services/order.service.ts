@@ -1,6 +1,7 @@
 import { CartItem, OrderItem, User, Order, Product } from "../entities";
 import { AppDataSource } from "../config/db.config";
-import { sendEmail } from "../utils/mailer";
+import { sendOrderConfirmationEmail, sendOrderStatusUpdateEmail } from "../utils/mailer";
+import logger from "../utils/logger";
 
 export const createOrderFromCart = async (userId: string) => {
   const userRepo = AppDataSource.getRepository(User);
@@ -63,14 +64,25 @@ export const createOrderFromCart = async (userId: string) => {
   console.log(
     `Order created for user ID: ${userId} with total: ${order.total}`
   );
-  await sendEmail(
+  // await sendEmail(
+  //   user.email,
+  //   `Your order has been created successfully`,
+  //   `
+  //   <h1>Order Confirmation</h1>
+  //   <p>Hello ${user.name},</p>
+  //   <p>Your order <strong>${order.id}</strong> has been created successfully. Soon to be processed</p>
+  //   `
+  // );
+  await sendOrderConfirmationEmail(
     user.email,
-    `Your order has been created successfully`,
-    `
-    <h1>Order Confirmation</h1>
-    <p>Hello ${user.name},</p>
-    <p>Your order <strong>${order.id}</strong> has been created successfully. Soon to be processed</p>
-    `
+    user.name,
+    order.id,
+    order.total,
+    orderItems.map(item => ({
+      product: item.product,
+      quantity: item.quantity,
+      unitPrice: item.unitPrice
+    }))
   );
 
   return order;
@@ -97,46 +109,30 @@ export const fetchSellerOrders = async (sellerId: string) => {
 
 export const updateOrderItemStatus = async (
   orderItemId: string,
-  newStatus: "SHIPPED" | "DELIVERED" | "CANCELLED",
-  sellerId: string
+  newStatus: string
 ) => {
   const repo = AppDataSource.getRepository(OrderItem);
-
   const orderItem = await repo.findOne({
     where: { id: orderItemId },
-    relations: ["product"],
+    relations: ["order", "order.buyer", "product"],
   });
 
   if (!orderItem) throw new Error("Order item not found");
 
-  if (orderItem.product.seller.id !== sellerId)
-    throw new Error("Unauthorized seller");
-
-  const allowedTransitions = {
-    PENDING: ["SHIPPED", "CANCELLED"],
-    SHIPPED: ["DELIVERED", "CANCELLED"],
-    DELIVERED: ["CANCELLED"],
-  };
-
-  const currentStatus = orderItem.status;
-  if (!allowedTransitions[currentStatus].includes(newStatus)) {
-    throw new Error(
-      `Invalid status transition: ${currentStatus} -> ${newStatus}`
-    );
-  }
   //@ts-ignore
   orderItem.status = newStatus;
   await repo.save(orderItem);
+  
   const buyer = orderItem.order.buyer;
-  await sendEmail(
+  
+  await sendOrderStatusUpdateEmail(
     buyer.email,
-    `Your order item status has been updated`,
-    `
-      <h3>Order Update</h3>
-      <p>Hi ${buyer.name},</p>
-      <p>The item <strong>${orderItem.product.title}</strong> is now <strong>${newStatus.toUpperCase()}</strong>.</p>
-      <p>Thank you for shopping with us!</p>
-    `
+    buyer.name,
+    orderItem.order.id,
+    orderItem.product.title,
+    newStatus,
+    newStatus === "shipped" ? `TRK${Math.floor(100000 + Math.random() * 900000)}` : undefined
   );
+
   return orderItem;
 };

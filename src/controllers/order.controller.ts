@@ -53,7 +53,7 @@ export const updateOrderItemStatus = async (
   const updated = await OrderService.updateOrderItemStatus(
     orderItemId,
     status,
-    sellerId
+    // sellerId
   );
 
   res.status(200).json({ orderItem: updated });

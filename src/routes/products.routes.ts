@@ -34,9 +34,9 @@ productRoutes.get("/seller", authenticate, getSellerProductsController);
 // get seller products by id (public)
 
 productRoutes.get("/seller/:sellerId", getProductsBySellerController);
-productRoutes.get("/products/:id", getProductByIdController);
+productRoutes.get("/:id", getProductByIdController);
 //@ts-ignore
-productRoutes.delete("/products/:id", authenticate, deleteProductController);
+productRoutes.delete("/:id", authenticate, deleteProductController);
 productRoutes.put(
   "/:id",
   //@ts-ignore

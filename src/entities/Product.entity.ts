@@ -7,6 +7,7 @@ import {
   ManyToOne,
 } from "typeorm";
 import { User } from "./User.entity";
+import { Category } from "./Category.entity";
 
 @Entity()
 export class Product {
@@ -22,8 +23,8 @@ export class Product {
   @Column("decimal", { precision: 10, scale: 2 })
   price!: number;
 
-  @Column()
-  category!: string;
+  @ManyToOne(() => Category, (category) => category.products, { eager: true })
+  category!: Category;
 
   @Column({ type: "int", default: 0 })
   quantity!: number;

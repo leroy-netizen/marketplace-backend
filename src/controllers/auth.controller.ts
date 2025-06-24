@@ -109,7 +109,6 @@ export const resetPasswordController = async (req: Request, res: Response) => {
   }
 };
 
-// controllers/admin.controller.ts
 
 const allowedRoles = ["admin", "seller", "buyer"];
 

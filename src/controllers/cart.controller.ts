@@ -53,7 +53,7 @@ export const updateCartItem = async (
   res: Response
 ): Promise<void> => {
   const userId = req.user!.id;
-  const cartItemId = req.params.id;
+  const cartItemId = req.params.itemId;
   const { quantity } = req.body;
 
   if (typeof quantity !== "number" || quantity < 1) {
@@ -75,7 +75,7 @@ export const removeCartItem = async (
   res: Response
 ): Promise<void> => {
   const userId = req.user!.id;
-  const cartItemId = req.params.id;
+  const cartItemId = req.params.itemId;
 
   try {
     await deleteCartItem(userId, cartItemId);

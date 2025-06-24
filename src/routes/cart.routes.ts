@@ -15,6 +15,6 @@ cartRoutes.use(authenticate);
 
 cartRoutes.get("/get-all-items", authenticate, getCartItems);
 cartRoutes.post("/add-to", authenticate, addToCart);
-cartRoutes.patch("/update/:itemId", updateCartItem);
+cartRoutes.patch("/update/:itemId", authenticate, updateCartItem);
 cartRoutes.delete("/remove/:itemId", authenticate, removeCartItem);
 cartRoutes.delete("/clear", authenticate, clearCart);

@@ -89,21 +89,17 @@ export const forgotPasswordService = async (email: string) => {
   // Generate a 6-digit OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-  // Store OTP in Redis
   await setOTP(email, otp);
 
-  // Send OTP email using the template
   try {
     await sendOTPEmail(email, otp);
     logger.info(`Password reset OTP sent to: ${email}`);
   } catch (emailError: any) {
-    // In development, log the OTP if email fails
     logger.warn(`Email sending failed, logging OTP for development: ${otp}`, {
       error: emailError.message,
       email,
     });
     console.log(`🔐 EMAIL FAILED - OTP for ${email}: ${otp}`);
-    // Don't throw the error, continue with the flow
   }
 };
 

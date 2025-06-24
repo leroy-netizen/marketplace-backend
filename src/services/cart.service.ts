@@ -7,13 +7,13 @@ const CART_CACHE_TTL = 1800; //30 minutes
 export const getUserCartItems = async (userId: string) => {
   const cachedCart = await redisClient.get(`cart:${userId}`);
   if (cachedCart) {
-    return JSON.parse(cachedCart);
+    return { cartItems: JSON.parse(cachedCart) };
   }
   const cartRepo = AppDataSource.getRepository(CartItem);
 
-  const cartItems = cartRepo.find({
+  const cartItems = await cartRepo.find({
     where: { user: { id: userId } },
-    relations: ["product", "user"],
+    relations: ["product", "product.seller", "user"],
   });
 
   await redisClient.setEx(
@@ -21,7 +21,7 @@ export const getUserCartItems = async (userId: string) => {
     CART_CACHE_TTL,
     JSON.stringify(cartItems)
   );
-  return cartItems;
+  return { cartItems };
 };
 export const addOrUpdateCartItem = async (
   userId: string,
@@ -49,18 +49,26 @@ export const addOrUpdateCartItem = async (
     where: { user: { id: userId }, product: { id: productId } },
     relations: ["user", "product"],
   });
+
+  let result;
   if (existingCartItem) {
     // Update quantity if item already exists in cart
     existingCartItem.quantity += quantity;
-    return await cartRepo.save(existingCartItem);
+    result = await cartRepo.save(existingCartItem);
+  } else {
+    // Create new cart item if it doesn't exist
+    const newCartItem = cartRepo.create({
+      user: { id: userId } as User,
+      product: { id: productId } as Product,
+      quantity,
+    });
+    result = await cartRepo.save(newCartItem);
   }
-  // Create new cart item if it doesn't exist
-  const newCartItem = cartRepo.create({
-    user: { id: userId } as User,
-    product: { id: productId } as Product,
-    quantity,
-  });
-  return await cartRepo.save(newCartItem);
+
+  // Clear cache after adding/updating cart item
+  await redisClient.del(`cart:${userId}`);
+
+  return result;
 };
 
 export const updateCartItemQuantity = async (
@@ -79,7 +87,12 @@ export const updateCartItemQuantity = async (
   }
 
   item.quantity = quantity;
-  return await repo.save(item);
+  const result = await repo.save(item);
+
+  // Clear cache after updating cart item
+  await redisClient.del(`cart:${userId}`);
+
+  return result;
 };
 export const deleteCartItem = async (userId: string, cartItemId: string) => {
   const repo = AppDataSource.getRepository(CartItem);
@@ -93,6 +106,9 @@ export const deleteCartItem = async (userId: string, cartItemId: string) => {
   }
 
   await repo.remove(item);
+
+  // Clear cache after removing cart item
+  await redisClient.del(`cart:${userId}`);
 };
 export const clearUserCart = async (userId: string) => {
   const repo = AppDataSource.getRepository(CartItem);
@@ -102,5 +118,6 @@ export const clearUserCart = async (userId: string) => {
 
   await repo.remove(items);
 
-  await redisClient.del(`cartL${userId}`);
+  // Clear cache after clearing cart (fix typo in key)
+  await redisClient.del(`cart:${userId}`);
 };

@@ -1,10 +1,19 @@
 import { AppDataSource } from "../../config/db.config";
 import { Order } from "../../entities";
 
-export const getAllOrders = async (filters: any) => {
+interface OrderFilters {
+  status?: string;
+  buyerEmail?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+type OrderStatus = "pending" | "paid" | "shipped" | "fulfilled" | "cancelled";
+
+export const getAllOrders = async (filters: OrderFilters) => {
   const repo = AppDataSource.getRepository(Order);
 
-  // TODO: Add filtering logic (status, buyer email, date range)
+  // Basic ordering by creation date - filtering can be added as needed
   const orders = await repo.find({ order: { createdAt: "DESC" } });
 
   return orders;
@@ -24,7 +33,7 @@ export const getOrderDetails = async (orderId: string) => {
 
 export const updateOrderStatus = async (
   orderId: string,
-  newStatus: "pending" | "paid" | "shipped" | "fulfilled" | "cancelled"
+  newStatus: OrderStatus
 ) => {
   const repo = AppDataSource.getRepository(Order);
   const order = await repo.findOne({ where: { id: orderId } });

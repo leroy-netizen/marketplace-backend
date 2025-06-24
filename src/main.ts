@@ -6,10 +6,12 @@ import path from "path";
 import { swaggerUi, swaggerSpec } from "./config/swagger.config";
 import {
   authRoutes,
+  categoryRoutes,
   productRoutes,
   cartRoutes,
   adminRouter as orderAdminRoutes,
   conversationRoutes,
+  healthRoutes,
 } from "./routes";
 import { orderRoutes } from "./routes/order.routes";
 import logger from "./utils/logger";
@@ -29,23 +31,48 @@ process.on("uncaughtException", logUncaughtException);
 dotenv.config();
 
 const app = express();
-app.use(cors({ origin: "*" }));
-
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Origin",
+      "X-Requested-With",
+      "Content-Type",
+      "Accept",
+      "Authorization",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(logRequest);
 
 // API routes
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/api/health", healthRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/categories", categoryRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/products", productRoutes);
-app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
+// Serve static files with CORS headers
+app.use(
+  "/uploads",
+  (_req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET");
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept"
+    );
+    next();
+  },
+  express.static(path.join(__dirname, "../uploads"))
+);
 app.use("/api/orders", orderRoutes);
 app.use("/api/admin/orders", orderAdminRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/messages", messageRoutes);
-
 
 app.use(logError);
 // @ts-ignore
@@ -67,4 +94,4 @@ AppDataSource.initialize()
     });
   });
 
-export default app; 
+export default app;
